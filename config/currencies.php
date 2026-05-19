@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'USD' => ['name' => 'US Dollar', 'symbol' => '$'],
+    'EUR' => ['name' => 'Euro', 'symbol' => '€'],
+    'GBP' => ['name' => 'British Pound', 'symbol' => '£'],
+    'INR' => ['name' => 'Indian Rupee', 'symbol' => '₹'],
+    'JPY' => ['name' => 'Japanese Yen', 'symbol' => '¥', 'decimals' => 0],
+    'CAD' => ['name' => 'Canadian Dollar', 'symbol' => 'CA$'],
+    'AUD' => ['name' => 'Australian Dollar', 'symbol' => 'A$'],
+    'CHF' => ['name' => 'Swiss Franc', 'symbol' => 'CHF '],
+    'CNY' => ['name' => 'Chinese Yuan', 'symbol' => '¥'],
+    'SGD' => ['name' => 'Singapore Dollar', 'symbol' => 'S$'],
+    'AED' => ['name' => 'UAE Dirham', 'symbol' => 'AED '],
+    'SAR' => ['name' => 'Saudi Riyal', 'symbol' => 'SAR '],
+    'PKR' => ['name' => 'Pakistani Rupee', 'symbol' => '₨'],
+    'BDT' => ['name' => 'Bangladeshi Taka', 'symbol' => '৳'],
+    'LKR' => ['name' => 'Sri Lankan Rupee', 'symbol' => 'Rs '],
+    'NPR' => ['name' => 'Nepalese Rupee', 'symbol' => 'Rs '],
+    'MYR' => ['name' => 'Malaysian Ringgit', 'symbol' => 'RM '],
+    'THB' => ['name' => 'Thai Baht', 'symbol' => '฿'],
+    'PHP' => ['name' => 'Philippine Peso', 'symbol' => '₱'],
+    'ZAR' => ['name' => 'South African Rand', 'symbol' => 'R '],
+    'BRL' => ['name' => 'Brazilian Real', 'symbol' => 'R$'],
+    'MXN' => ['name' => 'Mexican Peso', 'symbol' => 'MX$'],
+    'KRW' => ['name' => 'South Korean Won', 'symbol' => '₩', 'decimals' => 0],
+];
