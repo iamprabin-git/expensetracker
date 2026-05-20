@@ -9,12 +9,15 @@
 <head>
     @include('layouts.partials.theme-init')
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if ($metaDescription)
         <meta name="description" content="{{ $metaDescription }}">
     @endif
-    <title>{{ $title ? $title.' — ' : '' }}{{ config('app.name', 'ExpenseTracker') }}</title>
+    <title>{{ $title ? $title.' — ' : '' }}{{ $company?->company_name ?? config('app.name') }}</title>
+    @if ($company?->faviconUrl())
+        <link rel="icon" href="{{ $company->faviconUrl() }}" type="image/png">
+    @endif
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -29,6 +29,11 @@ class TransactionResource extends Resource
         return false;
     }
 
+    public static function canAccess(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return TransactionForm::configure($schema);

@@ -13,12 +13,23 @@ class NotificationController extends Controller
 {
     public function indexPage(Request $request): View
     {
-        $notifications = $request->user()
-            ->notifications()
-            ->latest()
-            ->paginate(20);
+        $user = $request->user();
+        $filter = $request->query('filter') === 'unread' ? 'unread' : 'all';
 
-        return view('notifications.index', compact('notifications'));
+        $query = $user->notifications()->latest();
+
+        if ($filter === 'unread') {
+            $query->whereNull('read_at');
+        }
+
+        $notifications = $query->paginate(20)->withQueryString();
+
+        $stats = [
+            'total' => $user->notifications()->count(),
+            'unread' => $user->unreadNotifications()->count(),
+        ];
+
+        return view('notifications.index', compact('notifications', 'stats', 'filter'));
     }
 
     public function index(Request $request): JsonResponse

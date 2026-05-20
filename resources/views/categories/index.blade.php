@@ -17,7 +17,7 @@
                         <span class="badge {{ $category->type->badgeClass() }}">{{ $category->type->label() }}</span>
                     </div>
                     @if ($category->user_id)
-                        <div class="d-flex gap-2 mt-3">
+                        <div class="d-flex flex-wrap gap-2 mt-3 categories-index-actions">
                             <a href="{{ route('categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <form method="POST" action="{{ route('categories.destroy', $category) }}" onsubmit="return confirm('Delete this category?')">
                                 @csrf

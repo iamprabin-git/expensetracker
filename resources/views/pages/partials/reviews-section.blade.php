@@ -1,8 +1,8 @@
 <section class="site-section site-section--muted" id="reviews">
     <div class="container">
         <div class="text-center mx-auto mb-5" style="max-width: 40rem;">
-            <h2 class="site-section-title">What members say</h2>
-            <p class="site-section-lead">Reviews are submitted on this page and published only after admin approval. We never show private account or financial data.</p>
+            <h2 class="site-section-title">{{ $sectionTitle ?? 'What members say' }}</h2>
+            <p class="site-section-lead">{{ $sectionSubtitle ?? 'Reviews are submitted on this page and published only after admin approval. We never show private account or financial data.' }}</p>
         </div>
 
         @if (session('success') || session('info'))

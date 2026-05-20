@@ -7,7 +7,7 @@
 <body style="font-family: system-ui, sans-serif; line-height: 1.6; color: #334155;">
     <p>Hello,</p>
 
-    <p>A new user has registered on {{ config('app.name') }} and is waiting for your approval.</p>
+    <p>A new user has registered on {{ config('app.name') }} and is waiting for <strong>agent / admin approval</strong>.</p>
 
     <table style="border-collapse: collapse; margin: 1rem 0;">
         <tr><td style="padding: 4px 12px 4px 0; color: #64748b;">User ID</td><td><strong>#{{ $user->id }}</strong></td></tr>

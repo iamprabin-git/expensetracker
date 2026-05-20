@@ -16,20 +16,21 @@
                 <label class="label-app" for="type">Type</label>
                 <select name="type" id="type" class="input-app form-select">
                     <option value="">All types</option>
-                    <option value="income" @selected(request('type') === 'income')>Income</option>
-                    <option value="expense" @selected(request('type') === 'expense')>Expense</option>
+                    @foreach (\App\Enums\TransactionType::cases() as $type)
+                        <option value="{{ $type->value }}" @selected(request('type') === $type->value)>{{ $type->label() }}</option>
+                    @endforeach
                 </select>
             </div>
-            <div class="col-12 col-md-5 d-flex gap-2">
-                <button type="submit" class="btn-primary-app">Filter</button>
-                <a href="{{ route('transactions.index') }}" class="btn-secondary-app">Reset</a>
+            <div class="col-12 col-md-5 d-flex flex-wrap gap-2">
+                <button type="submit" class="btn-primary-app flex-grow-1 flex-sm-grow-0">Filter</button>
+                <a href="{{ route('transactions.index') }}" class="btn-secondary-app flex-grow-1 flex-sm-grow-0">Reset</a>
             </div>
         </form>
     </div>
 
     <div class="card-panel">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+        <div class="table-responsive table-scroll-touch">
+            <table class="table table-hover align-middle mb-0 table-mobile-stack">
                 <thead>
                     <tr class="text-secondary">
                         <th>Title</th>
@@ -43,21 +44,21 @@
                 <tbody>
                     @forelse ($transactions as $transaction)
                         <tr>
-                            <td>
+                            <td data-label="Title">
                                 <div class="fw-medium">{{ $transaction->title }}</div>
                                 <div class="text-secondary small d-lg-none">{{ $transaction->transaction_date->format('M d, Y') }}</div>
                             </td>
-                            <td class="d-none d-sm-table-cell">
-                                <span @class(['badge', $transaction->isIncome() ? 'text-bg-success' : 'text-bg-danger'])>
+                            <td class="d-none d-sm-table-cell" data-label="Type">
+                                <span @class(['badge', $transaction->typeBadgeClass()])>
                                     {{ $transaction->type->label() }}
                                 </span>
                             </td>
-                            <td class="d-none d-md-table-cell">{{ $transaction->category?->name ?? '—' }}</td>
-                            <td class="d-none d-lg-table-cell">{{ $transaction->transaction_date->format('M d, Y') }}</td>
-                            <td class="text-end fw-semibold {{ $transaction->isIncome() ? 'text-emerald-600' : 'text-rose-600' }}">
-                                {{ $transaction->isIncome() ? '+' : '-' }}<x-money :amount="$transaction->amount" />
+                            <td class="d-none d-md-table-cell" data-label="Category">{{ $transaction->category?->name ?? '—' }}</td>
+                            <td class="d-none d-lg-table-cell" data-label="Date">{{ $transaction->transaction_date->format('M d, Y') }}</td>
+                            <td @class(['text-end fw-semibold', $transaction->amountColorClass()]) data-label="Amount">
+                                {{ $transaction->amountPrefix() }}<x-money :amount="$transaction->amount" />
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-1 flex-wrap">
                                     <a href="{{ route('transactions.edit', $transaction) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                                     <form method="POST" action="{{ route('transactions.destroy', $transaction) }}" onsubmit="return confirm('Delete this transaction?')">

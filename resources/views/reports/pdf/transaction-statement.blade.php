@@ -42,8 +42,8 @@
                     </td>
                     <td>{{ $transaction->category?->name ?? '—' }}</td>
                     <td>{{ $transaction->type->label() }}</td>
-                    <td class="num {{ $transaction->isIncome() ? 'success' : 'danger' }}">
-                        {{ $transaction->isIncome() ? '+' : '-' }}{{ $user->formatMoney((float) $transaction->amount) }}
+                    <td class="num {{ $transaction->type->value }}">
+                        {{ $transaction->amountPrefix() }}{{ $user->formatMoney((float) $transaction->amount) }}
                     </td>
                 </tr>
             @empty

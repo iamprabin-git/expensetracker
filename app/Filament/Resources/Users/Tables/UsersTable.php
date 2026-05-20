@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Users\Tables;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Support\Currencies;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -16,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class UsersTable
 {
@@ -32,8 +35,22 @@ class UsersTable
                 IconColumn::make('is_approved')
                     ->label('Approved')
                     ->boolean(),
+                IconColumn::make('ai_scan_enabled')
+                    ->label('AI Scan')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('currency')
+                    ->label('Currency')
+                    ->formatStateUsing(fn (?string $state): string => $state
+                        ? Currencies::formatLabel($state, Currencies::all()[$state] ?? ['name' => $state, 'symbol' => ''])
+                        : '—')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('membership_fee')
-                    ->money('USD')
+                    ->label('Membership fee')
+                    ->formatStateUsing(fn ($state, User $record): string => $state !== null
+                        ? Currencies::symbol($record->currency).number_format((float) $state, 2)
+                        : '—')
                     ->placeholder('—'),
                 TextColumn::make('membership_expires_at')
                     ->label('Expires')
@@ -51,6 +68,10 @@ class UsersTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 TernaryFilter::make('is_approved')->label('Approval status'),
+                TernaryFilter::make('ai_scan_enabled')->label('AI Scan access'),
+                SelectFilter::make('currency')
+                    ->label('Currency')
+                    ->options(Currencies::selectOptions()),
                 SelectFilter::make('membership_status')
                     ->label('Membership')
                     ->options([
@@ -72,6 +93,18 @@ class UsersTable
                     }),
             ])
             ->recordActions([
+                Action::make('toggleAiScan')
+                    ->label(fn (User $record): string => $record->ai_scan_enabled ? 'Disable AI Scan' : 'Enable AI Scan')
+                    ->icon(fn (User $record): string => $record->ai_scan_enabled ? 'heroicon-o-no-symbol' : 'heroicon-o-sparkles')
+                    ->color(fn (User $record): string => $record->ai_scan_enabled ? 'warning' : 'success')
+                    ->action(function (User $record): void {
+                        $record->update(['ai_scan_enabled' => ! $record->ai_scan_enabled]);
+
+                        Notification::make()
+                            ->title($record->ai_scan_enabled ? 'AI Scan enabled' : 'AI Scan disabled')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')
@@ -88,9 +121,13 @@ class UsersTable
                             ->default(now()->addYear()),
                     ])
                     ->action(function (User $record, array $data): void {
+                        $expiresAt = filled($data['membership_expires_at'] ?? null)
+                            ? Carbon::parse($data['membership_expires_at'])
+                            : null;
+
                         $record->approve(
                             isset($data['membership_fee']) ? (float) $data['membership_fee'] : null,
-                            $data['membership_expires_at'] ?? null,
+                            $expiresAt,
                         );
 
                         Notification::make()
@@ -116,6 +153,20 @@ class UsersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('enableAiScan')
+                        ->label('Enable AI Scan')
+                        ->icon('heroicon-o-sparkles')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['ai_scan_enabled' => true]))
+                        ->deselectRecordsAfterCompletion(),
+                    BulkAction::make('disableAiScan')
+                        ->label('Disable AI Scan')
+                        ->icon('heroicon-o-no-symbol')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['ai_scan_enabled' => false]))
+                        ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

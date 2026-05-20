@@ -14,8 +14,9 @@
         <div class="col-12 col-md-6">
             <label class="label-app" for="type">Type</label>
             <select name="type" id="type" class="input-app form-select @error('type') is-invalid @enderror" required>
-                <option value="income" @selected($defaultType === 'income')>Income</option>
-                <option value="expense" @selected($defaultType === 'expense')>Expense</option>
+                @foreach (\App\Enums\TransactionType::cases() as $type)
+                    <option value="{{ $type->value }}" @selected($defaultType === $type->value)>{{ $type->label() }}</option>
+                @endforeach
             </select>
             @error('type')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>

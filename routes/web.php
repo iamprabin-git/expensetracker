@@ -9,7 +9,9 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReceiptScanController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,17 +22,24 @@ Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
-Route::post('/contact', [PageController::class, 'sendContact'])->name('contact.send');
-Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+Route::post('/contact', [PageController::class, 'sendContact'])
+    ->middleware('throttle:10,1')
+    ->name('contact.send');
+Route::post('/reviews', [ReviewController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('reviews.store');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/pages/{slug}', [PageController::class, 'show'])
+    ->name('pages.show')
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*');
 
 Route::middleware(['auth', 'user.panel'])->group(function () {
     Route::get('/account/pending', [AccountStatusController::class, 'pending'])->name('account.pending');
     Route::get('/account/expired', [AccountStatusController::class, 'expired'])->name('account.expired');
 });
 
-Route::middleware(['auth', 'verified', 'user.panel'])->prefix('notifications')->name('notifications.')->group(function () {
+Route::middleware(['auth', 'user.panel'])->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/', [NotificationController::class, 'indexPage'])->name('index');
     Route::get('/feed', [NotificationController::class, 'index'])->name('feed');
     Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
@@ -57,8 +66,21 @@ Route::middleware(['auth', 'verified', 'user.panel', 'user.approved', 'membershi
             $request->query()
         ));
     })->name('transactions.statement.pdf');
+    Route::middleware('ai.scan')->group(function () {
+        Route::get('ai-scan', [ReceiptScanController::class, 'index'])->name('ai-scan.index');
+        Route::post('ai-scan/analyze', [ReceiptScanController::class, 'analyze'])
+            ->middleware('throttle:20,1')
+            ->name('ai-scan.analyze');
+        Route::post('ai-scan/store', [ReceiptScanController::class, 'store'])->name('ai-scan.store');
+    });
     Route::resource('transactions', TransactionController::class)->except(['show']);
     Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::get('budgets', [BudgetController::class, 'index'])->name('budgets.index');
+    Route::put('budgets/plan', [BudgetController::class, 'updatePlan'])->name('budgets.plan.update');
+    Route::post('budgets/items', [BudgetController::class, 'storeItem'])->name('budgets.items.store');
+    Route::put('budgets/items/{budgetItem}', [BudgetController::class, 'updateItem'])->name('budgets.items.update');
+    Route::delete('budgets/items/{budgetItem}', [BudgetController::class, 'destroyItem'])->name('budgets.items.destroy');
+    Route::post('budgets/duplicate', [BudgetController::class, 'duplicate'])->name('budgets.duplicate');
     Route::post('reminders/{reminder}/toggle', [ReminderController::class, 'toggle'])->name('reminders.toggle');
     Route::resource('reminders', ReminderController::class)->except(['show']);
 });

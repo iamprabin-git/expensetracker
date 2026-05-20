@@ -4,6 +4,7 @@ import { initSiteFooter } from './site-footer';
 import { initSiteHeader } from './site-header';
 import { initUserSidebar } from './user-sidebar';
 import { initUserNotifications } from './user-notifications';
+import { initAiScan } from './ai-scan';
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSiteFooter();
     initUserSidebar();
     initUserNotifications();
+    initAiScan();
 });
 
 Alpine.start();

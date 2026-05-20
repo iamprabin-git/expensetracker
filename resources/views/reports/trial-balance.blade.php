@@ -6,10 +6,10 @@
     @include('reports.partials.filters')
     @include('reports.partials.header')
 
-    <div class="report-page card-panel bg-white mx-auto" style="max-width: 56rem;">
+    <div class="report-page report-page-wrap card-panel bg-white mx-auto">
         <p class="small text-secondary mb-3">Derived from your income and expense transactions by category.</p>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
+        <div class="table-responsive table-scroll-touch">
+            <table class="table table-bordered align-middle table-mobile-stack">
                 <thead class="table-light">
                     <tr>
                         <th>Account</th>
@@ -20,9 +20,9 @@
                 <tbody>
                     @forelse ($report['lines'] as $line)
                         <tr>
-                            <td>{{ $line['account'] }}</td>
-                            <td class="text-end">{{ $line['debit'] > 0 ? $user->formatMoney($line['debit']) : '—' }}</td>
-                            <td class="text-end">{{ $line['credit'] > 0 ? $user->formatMoney($line['credit']) : '—' }}</td>
+                            <td data-label="Account">{{ $line['account'] }}</td>
+                            <td class="text-end" data-label="Debit">{{ $line['debit'] > 0 ? $user->formatMoney($line['debit']) : '—' }}</td>
+                            <td class="text-end" data-label="Credit">{{ $line['credit'] > 0 ? $user->formatMoney($line['credit']) : '—' }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="3" class="text-center text-secondary py-4">No transactions in this period.</td></tr>

@@ -1,4 +1,4 @@
-@if (config('services.google.client_id'))
+@if (config('services.google.client_id') && config('services.google.client_secret'))
     <a
         href="{{ route('auth.google.redirect') }}"
         class="btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2 mb-4"
@@ -17,4 +17,8 @@
         <span class="small text-secondary">or</span>
         <hr class="flex-grow-1 m-0">
     </div>
+@else
+    <p class="small text-secondary mb-4">
+        Google sign-in is not configured. Set <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in your <code>.env</code> file.
+    </p>
 @endif

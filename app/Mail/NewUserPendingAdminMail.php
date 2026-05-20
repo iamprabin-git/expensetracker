@@ -20,7 +20,7 @@ class NewUserPendingAdminMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New user registration pending approval — '.config('app.name'),
+            subject: 'Action required: approve new user — '.config('app.name'),
         );
     }
 

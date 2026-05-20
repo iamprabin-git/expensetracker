@@ -1,4 +1,4 @@
-<div class="report-page card-panel bg-white mx-auto mb-4" style="max-width: 56rem;">
+<div class="report-page report-page-wrap card-panel bg-white mx-auto mb-4">
     <div class="border-bottom pb-4 mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
             <div>

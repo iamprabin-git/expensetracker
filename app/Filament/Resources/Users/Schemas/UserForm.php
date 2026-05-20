@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\UserRole;
+use App\Support\Currencies;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
@@ -31,12 +33,17 @@ class UserForm
                 Toggle::make('is_approved')
                     ->label('Approved')
                     ->visible(fn (?string $operation, $record) => $record?->role !== UserRole::Admin),
+                Toggle::make('ai_scan_enabled')
+                    ->label('AI Scan enabled')
+                    ->helperText('Allow this user to upload receipts and use AI bill scanning in the user panel.')
+                    ->default(true)
+                    ->visible(fn (?string $operation, $record) => ($record?->role ?? UserRole::User) !== UserRole::Admin),
                 DateTimePicker::make('approved_at')
                     ->visible(fn (?string $operation, $record) => $record?->role !== UserRole::Admin),
                 TextInput::make('membership_fee')
                     ->label('Membership fee')
                     ->numeric()
-                    ->prefix('$')
+                    ->prefix(fn (Get $get, $record): string => Currencies::symbol($get('currency') ?? $record?->currency))
                     ->minValue(0)
                     ->visible(fn (?string $operation, $record) => $record?->role !== UserRole::Admin),
                 DateTimePicker::make('membership_expires_at')

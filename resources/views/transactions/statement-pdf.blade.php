@@ -107,8 +107,8 @@
                     </td>
                     <td>{{ $transaction->category?->name ?? '—' }}</td>
                     <td>{{ $transaction->type->label() }}</td>
-                    <td class="amount {{ $transaction->isIncome() ? 'income' : 'expense' }}">
-                        {{ $transaction->isIncome() ? '+' : '-' }}{{ $user->formatMoney((float) $transaction->amount) }}
+                    <td class="amount {{ $transaction->type->value }}">
+                        {{ $transaction->amountPrefix() }}{{ $user->formatMoney((float) $transaction->amount) }}
                     </td>
                 </tr>
             @empty

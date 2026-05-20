@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAiScanEnabled;
 use App\Http\Middleware\EnsureMembershipIsActive;
 use App\Http\Middleware\EnsureUserIsApproved;
 use App\Http\Middleware\EnsureUserIsRegular;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.panel' => EnsureUserIsRegular::class,
             'user.approved' => EnsureUserIsApproved::class,
             'membership.active' => EnsureMembershipIsActive::class,
+            'ai.scan' => EnsureAiScanEnabled::class,
             'guest.user' => RedirectAdminFromGuestAuth::class,
         ]);
     })

@@ -5,20 +5,22 @@
                 {{-- Brand column --}}
                 <div class="col-12 col-lg-4">
                     <a href="{{ route('home') }}" class="site-brand site-brand--footer">
-                        <span class="site-brand__icon" aria-hidden="true">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="22" height="22">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797-2.101c6.27 1.645 10.53 4.978 12.453 7.75M2.25 9.75v10.5m0-10.5c0-3.75 3.75-6.75 8.25-6.75s8.25 3 8.25 6.75m-16.5 0v10.5" />
-                            </svg>
-                        </span>
-                        <span>Expense<span class="site-brand__accent">Tracker</span></span>
+                        @unless ($company?->logoUrl())
+                            <span class="site-brand__icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="22" height="22">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797-2.101c6.27 1.645 10.53 4.978 12.453 7.75M2.25 9.75v10.5m0-10.5c0-3.75 3.75-6.75 8.25-6.75s8.25 3 8.25 6.75m-16.5 0v10.5" />
+                                </svg>
+                            </span>
+                        @endunless
+                        <x-site-brand />
                     </a>
                     <p class="site-footer__lead">
-                        Professional income and expense tracking with a clean dashboard, smart categories, and secure multi-user access.
+                        {{ $company?->footer_lead ?? $company?->tagline ?? '' }}
                     </p>
                     <div class="site-footer__socials">
-                        <a href="#" class="site-footer__social" aria-label="Twitter"><span aria-hidden="true">𝕏</span></a>
-                        <a href="#" class="site-footer__social" aria-label="LinkedIn"><span aria-hidden="true">in</span></a>
-                        <a href="#" class="site-footer__social" aria-label="GitHub"><span aria-hidden="true">GH</span></a>
+                        @foreach ($company?->socialLinkList() ?? [] as $social)
+                            <a href="{{ \App\Support\CmsUrl::resolve($social['link_url'] ?? '#') }}" class="site-footer__social" aria-label="{{ $social['title'] ?? 'Social' }}"><span aria-hidden="true">{{ $social['label'] ?? '•' }}</span></a>
+                        @endforeach
                     </div>
                 </div>
 
@@ -50,8 +52,8 @@
 
                 {{-- Newsletter --}}
                 <div class="col-12 col-lg-4">
-                    <h3 class="site-footer__title">Stay updated</h3>
-                    <p class="site-footer__text mb-3">Tips and product news. Unsubscribe anytime.</p>
+                    <h3 class="site-footer__title">{{ $company?->newsletter_title ?? 'Stay updated' }}</h3>
+                    <p class="site-footer__text mb-3">{{ $company?->newsletter_text ?? '' }}</p>
                     <form class="site-footer__newsletter" onsubmit="return false;">
                         <input type="email" class="site-footer__input form-control" placeholder="Email address" aria-label="Email">
                         <button type="button" class="btn site-footer__submit">Subscribe</button>
@@ -116,7 +118,7 @@
     <div class="site-footer__bottom">
         <div class="container">
             <div class="site-footer__bottom-inner">
-                <p class="site-footer__copy mb-0">&copy; {{ date('Y') }} {{ config('app.name', 'ExpenseTracker') }}. All rights reserved.</p>
+                <p class="site-footer__copy mb-0">&copy; {{ date('Y') }} {{ $company?->copyright_text ?? $company?->company_name ?? config('app.name') }}. All rights reserved.</p>
                 <div class="site-footer__bottom-links">
                     <a href="{{ route('privacy') }}">Privacy</a>
                     <span aria-hidden="true">·</span>

@@ -1,4 +1,8 @@
-<div class="dropdown user-notifications" data-user-notifications>
+<div
+    class="dropdown user-notifications"
+    data-user-notifications
+    data-notification-sound="{{ auth()->user()?->notification_sound_enabled ? '1' : '0' }}"
+>
     <button
         type="button"
         class="user-panel-header__icon-btn dropdown-toggle user-notifications__toggle"
@@ -15,22 +19,22 @@
         <span class="user-notifications__badge d-none" data-notifications-badge aria-hidden="true">0</span>
     </button>
 
-    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 user-notifications__menu">
-        <div class="user-notifications__header d-flex align-items-center justify-content-between gap-2 px-3 py-2 border-bottom">
-            <span class="fw-semibold">Notifications</span>
-            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none d-none" data-notifications-mark-all>
-                Mark all read
+    <div class="dropdown-menu dropdown-menu-end user-notifications__menu border-0 mt-2 p-0">
+        <div class="fb-notif-dropdown__header">
+            <span class="fb-notif-dropdown__title">Notifications</span>
+            <button type="button" class="fb-notif-dropdown__mark-all d-none" data-notifications-mark-all>
+                Mark all as read
             </button>
         </div>
 
-        <div class="user-notifications__list" data-notifications-list role="list">
-            <div class="user-notifications__loading px-3 py-4 text-center text-secondary small" data-notifications-loading>
-                Loading…
+        <div class="fb-notif-dropdown__list user-notifications__list" data-notifications-list role="list">
+            <div class="fb-notif-dropdown__loading user-notifications__loading" data-notifications-loading>
+                <span class="user-notifications__loading-spinner" aria-hidden="true"></span>
             </div>
         </div>
 
-        <div class="user-notifications__footer border-top px-3 py-2 text-center">
-            <a href="{{ route('notifications.index') }}" class="small text-decoration-none">View all notifications</a>
-        </div>
+        <a href="{{ route('notifications.index') }}" class="fb-notif-dropdown__footer">
+            See all notifications
+        </a>
     </div>
 </div>

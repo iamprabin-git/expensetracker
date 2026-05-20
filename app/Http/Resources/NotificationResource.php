@@ -23,7 +23,7 @@ class NotificationResource extends JsonResource
             'read' => $this->read_at !== null,
             'read_at' => $this->read_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
-            'created_at_human' => $this->created_at?->diffForHumans(),
+            'created_at_human' => $this->created_at?->diffForHumans(null, true),
         ];
     }
 }

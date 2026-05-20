@@ -6,21 +6,21 @@
     @include('reports.partials.filters')
     @include('reports.partials.header')
 
-    <div class="report-page card-panel bg-white mx-auto" style="max-width: 56rem;">
+    <div class="report-page report-page-wrap card-panel bg-white mx-auto">
         <div class="row g-3 mb-4">
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Income</p>
                     <p class="fw-bold text-success mb-0">{{ $user->formatMoney($totals['income']) }}</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Expenses</p>
                     <p class="fw-bold text-danger mb-0">{{ $user->formatMoney($totals['expense']) }}</p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Net balance</p>
                     <p class="fw-bold mb-0 {{ $totals['balance'] >= 0 ? 'text-primary' : 'text-danger' }}">
@@ -30,8 +30,8 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0">
+        <div class="table-responsive table-scroll-touch">
+            <table class="table table-bordered align-middle mb-0 table-mobile-stack">
                 <thead class="table-light">
                     <tr>
                         <th>Date</th>
@@ -44,17 +44,17 @@
                 <tbody>
                     @forelse ($transactions as $transaction)
                         <tr>
-                            <td class="text-nowrap">{{ $transaction->transaction_date->format('M d, Y') }}</td>
-                            <td>
+                            <td class="text-nowrap" data-label="Date">{{ $transaction->transaction_date->format('M d, Y') }}</td>
+                            <td data-label="Title">
                                 <span class="fw-medium">{{ $transaction->title }}</span>
                                 @if ($transaction->description)
                                     <br><span class="small text-secondary">{{ $transaction->description }}</span>
                                 @endif
                             </td>
-                            <td>{{ $transaction->category?->name ?? '—' }}</td>
-                            <td>{{ $transaction->type->label() }}</td>
-                            <td class="text-end fw-semibold {{ $transaction->isIncome() ? 'text-success' : 'text-danger' }}">
-                                {{ $transaction->isIncome() ? '+' : '-' }}{{ $user->formatMoney((float) $transaction->amount) }}
+                            <td data-label="Category">{{ $transaction->category?->name ?? '—' }}</td>
+                            <td data-label="Type">{{ $transaction->type->label() }}</td>
+                            <td @class(['text-end fw-semibold', $transaction->amountColorClass()]) data-label="Amount">
+                                {{ $transaction->amountPrefix() }}{{ $user->formatMoney((float) $transaction->amount) }}
                             </td>
                         </tr>
                     @empty

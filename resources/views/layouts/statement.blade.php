@@ -3,7 +3,7 @@
 <head>
     @include('layouts.partials.theme-init')
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>@yield('title', 'Transaction statement') — {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -31,9 +31,9 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 antialiased statement-body">
     <div class="statement-toolbar statement-no-print">
-        <div class="container py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="container py-3 d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
             <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-outline-secondary">&larr; Back to transactions</a>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto">
                 <button type="button" class="btn btn-sm btn-primary" onclick="window.print()">Print</button>
                 <a href="{{ route('transactions.statement.pdf', request()->query()) }}" class="btn btn-sm btn-outline-primary">Download PDF</a>
             </div>

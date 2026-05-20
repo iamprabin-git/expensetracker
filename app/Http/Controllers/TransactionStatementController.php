@@ -15,7 +15,7 @@ class TransactionStatementController extends Controller
         $request->validate([
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
-            'type' => ['nullable', 'in:income,expense'],
+            'type' => ['nullable', 'in:income,expense,asset,liability'],
         ]);
 
         $statement = TransactionStatementBuilder::fromRequest($request->user(), $request->all());
@@ -35,7 +35,7 @@ class TransactionStatementController extends Controller
         $request->validate([
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
-            'type' => ['nullable', 'in:income,expense'],
+            'type' => ['nullable', 'in:income,expense,asset,liability'],
         ]);
 
         $statement = TransactionStatementBuilder::fromRequest($request->user(), $request->all());

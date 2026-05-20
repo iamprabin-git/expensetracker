@@ -8,7 +8,11 @@
             </div>
             <h1 class="h4 fw-bold mb-2">Account awaiting approval</h1>
             <p class="text-secondary mb-4">
-                Thanks for registering, {{ auth()->user()->name }}. An administrator will review your account and set your membership before you can access the dashboard. Check your email for your login ID and password.
+                Thanks for registering, {{ auth()->user()->name }}. An approval request was sent to the admin agent, and your login credentials were emailed to <strong>{{ auth()->user()->email }}</strong>.
+                You can sign in anytime; the dashboard unlocks after an administrator approves your account and sets your membership.
+                @if (auth()->user()->google_id)
+                    You may also use <strong>Sign in with Google</strong> on the login page.
+                @endif
             </p>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

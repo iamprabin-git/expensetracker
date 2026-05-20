@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AccountStatusController extends Controller
 {
-    public function pending(Request $request): View
+    public function pending(Request $request): View|RedirectResponse
     {
         if ($request->user()?->isApproved()) {
             return redirect()->route('dashboard');
@@ -16,7 +17,7 @@ class AccountStatusController extends Controller
         return view('account.pending');
     }
 
-    public function expired(Request $request): View
+    public function expired(Request $request): View|RedirectResponse
     {
         $user = $request->user();
 

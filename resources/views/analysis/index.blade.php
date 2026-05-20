@@ -8,19 +8,19 @@
 
     <div data-analysis-root>
         <div class="row g-3 g-md-4 mb-4">
-            <div class="col-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="analysis-kpi card-panel h-100">
                     <p class="analysis-kpi__label">Total income</p>
                     <p class="analysis-kpi__value text-emerald-600 dark:text-emerald-400"><x-money :amount="$summary['income']" /></p>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="analysis-kpi card-panel h-100">
                     <p class="analysis-kpi__label">Total expenses</p>
                     <p class="analysis-kpi__value text-rose-600 dark:text-rose-400"><x-money :amount="$summary['expense']" /></p>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="analysis-kpi card-panel h-100">
                     <p class="analysis-kpi__label">Net balance</p>
                     <p @class([
@@ -29,7 +29,7 @@
                     ])><x-money :amount="$summary['balance']" /></p>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="analysis-kpi card-panel h-100">
                     <p class="analysis-kpi__label">This month (net)</p>
                     <p @class([

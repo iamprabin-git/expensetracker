@@ -1,4 +1,6 @@
 <x-guest-layout>
+    <h1 class="h4 fw-bold mb-2">Create account</h1>
+    @include('auth.partials.registration-notice')
     @include('auth.partials.google-button')
 
     <form method="POST" action="{{ route('register') }}">

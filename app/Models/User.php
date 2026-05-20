@@ -5,13 +5,16 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Notifications\UserPasswordResetNotification;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -26,13 +29,15 @@ use Illuminate\Support\Facades\Storage;
     'currency',
     'timezone',
     'locale',
+    'notification_sound_enabled',
+    'ai_scan_enabled',
     'is_approved',
     'approved_at',
     'membership_fee',
     'membership_expires_at',
 ])]
 #[Hidden(['password', 'remember_token', 'google_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -47,12 +52,19 @@ class User extends Authenticatable implements FilamentUser
             'approved_at' => 'datetime',
             'membership_fee' => 'decimal:2',
             'membership_expires_at' => 'datetime',
+            'notification_sound_enabled' => 'boolean',
+            'ai_scan_enabled' => 'boolean',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->role === UserRole::Admin && $panel->getId() === 'admin';
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatarUrl();
     }
 
     public function isAdmin(): bool
@@ -68,6 +80,24 @@ class User extends Authenticatable implements FilamentUser
     public function isApproved(): bool
     {
         return $this->isAdmin() || $this->is_approved;
+    }
+
+    public function hasAiScanAccess(): bool
+    {
+        if ($this->isAdmin()) {
+            return false;
+        }
+
+        return (bool) $this->ai_scan_enabled;
+    }
+
+    public function canUseAiScan(): bool
+    {
+        if (! $this->hasAiScanAccess()) {
+            return false;
+        }
+
+        return app(\App\Services\ReceiptScanService::class)->isConfigured();
     }
 
     public function hasActiveMembership(): bool
@@ -87,15 +117,20 @@ class User extends Authenticatable implements FilamentUser
         return $this->membership_expires_at->isFuture();
     }
 
-    public function approve(?float $membershipFee = null, ?\DateTimeInterface $expiresAt = null): void
+    public function approve(?float $membershipFee = null, \DateTimeInterface|string|null $expiresAt = null): void
     {
         $wasApproved = $this->is_approved;
+
+        if (is_string($expiresAt)) {
+            $expiresAt = Carbon::parse($expiresAt);
+        }
 
         $this->update([
             'is_approved' => true,
             'approved_at' => now(),
             'membership_fee' => $membershipFee ?? $this->membership_fee,
             'membership_expires_at' => $expiresAt ?? $this->membership_expires_at ?? now()->addYear(),
+            'email_verified_at' => $this->email_verified_at ?? now(),
         ]);
 
         if (! $wasApproved && $this->isRegularUser()) {
@@ -126,6 +161,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Reminder::class);
     }
 
+    public function budgetPlans(): HasMany
+    {
+        return $this->hasMany(BudgetPlan::class);
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
@@ -149,6 +189,11 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return strtoupper(substr($this->name, 0, 2));
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new UserPasswordResetNotification($token));
     }
 
     public function formatMoney(float $amount): string

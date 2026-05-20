@@ -3,7 +3,7 @@
 @section('title', 'Transaction statement')
 
 @section('content')
-    <div class="statement-page card-panel bg-white mx-auto" style="max-width: 56rem;">
+    <div class="statement-page card-panel bg-white mx-auto">
         <div class="statement-header border-bottom pb-4 mb-4">
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
                 <div>
@@ -36,8 +36,9 @@
                     <label class="label-app" for="type">Type</label>
                     <select name="type" id="type" class="form-select input-app">
                         <option value="">All</option>
-                        <option value="income" @selected($filters['type'] === 'income')>Income</option>
-                        <option value="expense" @selected($filters['type'] === 'expense')>Expense</option>
+                        @foreach (\App\Enums\TransactionType::cases() as $type)
+                            <option value="{{ $type->value }}" @selected($filters['type'] === $type->value)>{{ $type->label() }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="col-12 col-md-3 d-flex gap-2">
@@ -48,19 +49,19 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Income</p>
                     <p class="fw-bold text-success mb-0"><x-money :amount="$totals['income']" :user="$user" /></p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Expenses</p>
                     <p class="fw-bold text-danger mb-0"><x-money :amount="$totals['expense']" :user="$user" /></p>
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-12 col-sm-4">
                 <div class="rounded-3 border p-3 text-center">
                     <p class="small text-secondary mb-1">Net balance</p>
                     <p class="fw-bold mb-0 {{ $totals['balance'] >= 0 ? 'text-primary' : 'text-danger' }}">
@@ -70,8 +71,8 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0 statement-table">
+        <div class="table-responsive table-scroll-touch">
+            <table class="table table-bordered align-middle mb-0 statement-table table-mobile-stack">
                 <thead class="table-light">
                     <tr>
                         <th>Date</th>
@@ -84,17 +85,17 @@
                 <tbody>
                     @forelse ($transactions as $transaction)
                         <tr>
-                            <td class="text-nowrap">{{ $transaction->transaction_date->format('M d, Y') }}</td>
-                            <td>
+                            <td class="text-nowrap" data-label="Date">{{ $transaction->transaction_date->format('M d, Y') }}</td>
+                            <td data-label="Title">
                                 <span class="fw-medium">{{ $transaction->title }}</span>
                                 @if ($transaction->description)
                                     <br><span class="small text-secondary">{{ $transaction->description }}</span>
                                 @endif
                             </td>
-                            <td>{{ $transaction->category?->name ?? '—' }}</td>
-                            <td>{{ $transaction->type->label() }}</td>
-                            <td class="text-end fw-semibold {{ $transaction->isIncome() ? 'text-success' : 'text-danger' }}">
-                                {{ $transaction->isIncome() ? '+' : '-' }}<x-money :amount="$transaction->amount" :user="$user" />
+                            <td data-label="Category">{{ $transaction->category?->name ?? '—' }}</td>
+                            <td data-label="Type">{{ $transaction->type->label() }}</td>
+                            <td @class(['text-end fw-semibold', $transaction->amountColorClass()]) data-label="Amount">
+                                {{ $transaction->amountPrefix() }}<x-money :amount="$transaction->amount" :user="$user" />
                             </td>
                         </tr>
                     @empty

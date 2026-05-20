@@ -12,12 +12,14 @@
             {{-- Top bar --}}
             <div class="site-header__inner">
                 <a class="site-brand" href="{{ $brandUrl }}">
-                    <span class="site-brand__icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="22" height="22">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797-2.101c6.27 1.645 10.53 4.978 12.453 7.75M2.25 9.75v10.5m0-10.5c0-3.75 3.75-6.75 8.25-6.75s8.25 3 8.25 6.75m-16.5 0v10.5" />
-                        </svg>
-                    </span>
-                    <span class="site-brand__text">Expense<span class="site-brand__accent">Tracker</span></span>
+                    @unless ($company?->logoUrl())
+                        <span class="site-brand__icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="22" height="22">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797-2.101c6.27 1.645 10.53 4.978 12.453 7.75M2.25 9.75v10.5m0-10.5c0-3.75 3.75-6.75 8.25-6.75s8.25 3 8.25 6.75m-16.5 0v10.5" />
+                            </svg>
+                        </span>
+                    @endunless
+                    <x-site-brand />
                 </a>
 
                 {{-- Desktop nav --}}

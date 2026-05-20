@@ -4,7 +4,7 @@
 
     <div class="row g-4">
         <div class="col-12 col-xl-4">
-            <nav class="card-panel settings-nav sticky-top" style="top: 5.5rem;" aria-label="Settings sections">
+            <nav class="card-panel settings-nav sticky-lg-top" style="top: 5.5rem;" aria-label="Settings sections">
                 <p class="small text-secondary text-uppercase fw-semibold mb-3">Sections</p>
                 <ul class="list-unstyled settings-nav__list mb-0">
                     <li><a href="#profile-photo" class="settings-nav__link">Profile photo</a></li>
@@ -114,7 +114,11 @@
             {{-- Password --}}
             <section id="password" class="card-panel">
                 <h2 class="h5 fw-semibold mb-1">Password</h2>
-                <p class="small text-secondary mb-4">Use a strong password with at least 8 characters.</p>
+                <p class="small text-secondary mb-4">
+                    Use a strong password with at least 8 characters.
+                    <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot your password?</a>
+                    — we will email you a reset link.
+                </p>
 
                 <form method="POST" action="{{ route('settings.password.update') }}" class="row g-3">
                     @csrf
@@ -177,6 +181,20 @@
                         @error('locale')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-12">
+                        <div class="form-check mb-3">
+                            <input type="hidden" name="notification_sound_enabled" value="0">
+                            <input
+                                type="checkbox"
+                                name="notification_sound_enabled"
+                                id="notification_sound_enabled"
+                                value="1"
+                                class="form-check-input"
+                                @checked(old('notification_sound_enabled', $user->notification_sound_enabled ?? true))
+                            >
+                            <label class="form-check-label" for="notification_sound_enabled">
+                                Play bell sound when a new in-app notification arrives
+                            </label>
+                        </div>
                         <p class="small text-secondary mb-2">Preview: <x-money :amount="1234.56" :user="$user" class="fw-semibold" /></p>
                         <button type="submit" class="btn btn-primary site-btn-primary">Save preferences</button>
                     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Currencies;
 use App\Http\Requests\Settings\UpdateAvatarRequest;
 use App\Http\Requests\Settings\UpdateEmailRequest;
 use App\Http\Requests\Settings\UpdatePasswordRequest;
@@ -20,7 +21,8 @@ class SettingsController extends Controller
     {
         return view('settings.index', [
             'user' => $request->user(),
-            'currencies' => config('currencies'),
+            'currencies' => Currencies::enabled(),
+            'defaultCurrency' => Currencies::defaultCode(),
             'locales' => config('locales'),
             'timezones' => timezone_identifiers_list(),
         ]);
@@ -84,7 +86,14 @@ class SettingsController extends Controller
 
     public function updatePreferences(UpdatePreferencesRequest $request): RedirectResponse
     {
-        $request->user()->update($request->validated());
+        $user = $request->user();
+
+        $user->update([
+            'currency' => $request->validated('currency'),
+            'timezone' => $request->validated('timezone'),
+            'locale' => $request->validated('locale'),
+            'notification_sound_enabled' => $request->boolean('notification_sound_enabled'),
+        ]);
 
         return back()->with('success', 'Preferences saved.');
     }

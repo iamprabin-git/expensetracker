@@ -65,7 +65,7 @@ class TransactionStatementBuilder
             $query->whereDate('transaction_date', '<=', $this->toDate);
         }
 
-        if ($this->type && in_array($this->type, ['income', 'expense'], true)) {
+        if ($this->type && in_array($this->type, ['income', 'expense', 'asset', 'liability'], true)) {
             $query->where('type', $this->type);
         }
 

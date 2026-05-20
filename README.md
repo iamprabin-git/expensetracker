@@ -1,4 +1,4 @@
-# ExpenseTracker
+# Mero Expense Tracker
 
 A multi-auth income and expense tracking web application built with **Laravel 13**, **Filament 5** (admin panel), **Laravel Breeze** (user auth), **Bootstrap 5**, and **Tailwind CSS** (Tailwind UI–style components). Includes **light/dark mode** and a fully **mobile-responsive** layout.
 
@@ -28,10 +28,15 @@ php artisan key:generate
 npm install
 npm run build
 php artisan migrate --seed
+php artisan storage:link
 php artisan serve
 ```
 
 Visit `http://127.0.0.1:8000`.
+
+## Production deployment
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for essential steps: production `.env`, migrate, build assets, HTTPS, permissions, and security checklist.
 
 ## Public pages
 

@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(CompanySettingSeeder::class);
+        $this->call(SitePageSeeder::class);
+
         User::query()->updateOrCreate(
             ['email' => 'admin@expensetracker.test'],
             [

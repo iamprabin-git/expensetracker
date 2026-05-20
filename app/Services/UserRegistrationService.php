@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
+use App\Support\Currencies;
 use App\Mail\NewUserPendingAdminMail;
 use App\Mail\NewUserWelcomeCredentialsMail;
 use App\Models\User;
@@ -19,7 +20,7 @@ class UserRegistrationService
         string $plainPassword,
         ?string $googleId = null,
         ?string $googleToken = null,
-        bool $emailVerified = false,
+        bool $emailVerified = true,
     ): User {
         $user = User::create([
             'name' => $name,
@@ -29,7 +30,9 @@ class UserRegistrationService
             'is_approved' => false,
             'google_id' => $googleId,
             'google_token' => $googleToken,
+            // Account access is gated by admin approval, not email verification links.
             'email_verified_at' => $emailVerified ? now() : null,
+            'currency' => Currencies::defaultCode(),
         ]);
 
         event(new Registered($user));

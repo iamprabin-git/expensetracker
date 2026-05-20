@@ -1,24 +1,48 @@
+import { isNotificationSoundEnabled, ringNotificationBell } from './notification-sound';
+
 const routes = {
     feed: '/notifications/feed',
     unreadCount: '/notifications/unread-count',
     read: (id) => `/notifications/${id}/read`,
     readAll: '/notifications/read-all',
-    destroy: (id) => `/notifications/${id}`,
+};
+
+const categoryIcons = {
+    reminder: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
+    account: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.118a7.5 7.5 0 0114.998 0',
+    membership: 'M16.5 6v.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V6M4.5 19.5h15',
+    general: 'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text ?? '';
+    return div.innerHTML;
+}
+
 async function fetchJson(url, options = {}) {
     const response = await fetch(url, {
+        credentials: 'same-origin',
         headers: {
             Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': csrfToken(),
             ...(options.headers ?? {}),
         },
         ...options,
     });
+
+    if (response.status === 401 || response.status === 419) {
+        throw new Error('session_expired');
+    }
+
+    if (response.status === 403) {
+        throw new Error('forbidden');
+    }
 
     if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
@@ -27,38 +51,50 @@ async function fetchJson(url, options = {}) {
     return response.json();
 }
 
-function categoryIcon(category) {
-    const icons = {
-        reminder: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
-        account: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 19.118a7.5 7.5 0 0114.998 0',
-        membership: 'M16.5 6v.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V6M4.5 19.5h15',
-        general: 'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    };
-
-    return icons[category] ?? icons.general;
-}
-
 function renderNotificationItem(notification) {
-    const unreadClass = notification.read ? '' : 'user-notifications__item--unread';
-    const action = notification.action_url
-        ? `<a href="${notification.action_url}" class="user-notifications__item-link stretched-link" data-notification-open="${notification.id}"></a>`
+    const category = notification.category ?? 'general';
+    const isUnread = !notification.read;
+    const unreadClass = isUnread ? 'fb-notif-row--unread' : '';
+    const copyUnreadClass = isUnread ? 'fb-notif-row__copy--unread' : '';
+    const iconPath = categoryIcons[category] ?? categoryIcons.general;
+    const title = escapeHtml(notification.title);
+    const message = notification.message
+        ? `<span class="fb-notif-row__message">${escapeHtml(notification.message)}</span>`
         : '';
+    const titleHtml = isUnread
+        ? `<strong>${title}</strong>`
+        : `<span class="fb-notif-row__title">${title}</span>`;
+    const action = notification.action_url
+        ? `<a href="${escapeHtml(notification.action_url)}" class="fb-notif-row__link" data-notification-open="${escapeHtml(notification.id)}" aria-label="${title}"></a>`
+        : '';
+    const dot = isUnread ? '<span class="fb-notif-row__dot" aria-label="Unread"></span>' : '';
 
     return `
-        <article class="user-notifications__item ${unreadClass}" role="listitem" data-notification-id="${notification.id}">
+        <div class="fb-notif-row ${unreadClass}" role="listitem" data-notification-id="${escapeHtml(notification.id)}">
             ${action}
-            <div class="user-notifications__item-icon user-notifications__item-icon--${notification.category}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="18" height="18" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="${categoryIcon(notification.category)}" />
+            <span class="fb-notif-row__icon fb-notif-row__icon--${escapeHtml(category)}" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" width="22" height="22">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${iconPath}" />
                 </svg>
+            </span>
+            <div class="fb-notif-row__body">
+                <p class="fb-notif-row__copy ${copyUnreadClass}">
+                    ${titleHtml}
+                    ${message}
+                    <span class="fb-notif-row__time"> · ${escapeHtml(notification.created_at_human)}</span>
+                </p>
             </div>
-            <div class="user-notifications__item-body min-w-0">
-                <p class="user-notifications__item-title mb-0">${notification.title}</p>
-                <p class="user-notifications__item-message mb-1">${notification.message}</p>
-                <p class="user-notifications__item-time mb-0">${notification.created_at_human}</p>
-            </div>
-            <button type="button" class="user-notifications__item-delete btn btn-link btn-sm p-0" data-notification-delete="${notification.id}" title="Delete" aria-label="Delete notification">&times;</button>
-        </article>
+            ${dot}
+        </div>
+    `;
+}
+
+function renderEmptyState() {
+    return `
+        <div class="user-notifications__empty">
+            <p class="mb-0 fw-semibold">No notifications yet</p>
+            <p class="small mb-0 mt-1">You're all caught up.</p>
+        </div>
     `;
 }
 
@@ -75,6 +111,15 @@ export function initUserNotifications() {
     const toggle = root.querySelector('[data-notifications-toggle]');
 
     let pollTimer = null;
+    let lastUnreadCount = null;
+
+    const alertForNewNotifications = (count) => {
+        if (lastUnreadCount !== null && count > lastUnreadCount) {
+            ringNotificationBell(root);
+        }
+
+        lastUnreadCount = count;
+    };
 
     const updateBadge = (count) => {
         if (!badge) {
@@ -91,6 +136,8 @@ export function initUserNotifications() {
         if (markAllBtn) {
             markAllBtn.classList.toggle('d-none', count === 0);
         }
+
+        alertForNewNotifications(count);
     };
 
     const renderList = (notifications) => {
@@ -101,7 +148,7 @@ export function initUserNotifications() {
         loading?.remove();
 
         if (!notifications.length) {
-            list.innerHTML = '<p class="user-notifications__empty px-3 py-4 mb-0 text-center text-secondary small">No notifications yet.</p>';
+            list.innerHTML = renderEmptyState();
             return;
         }
 
@@ -116,9 +163,12 @@ export function initUserNotifications() {
                 ? data.notifications
                 : (data.notifications?.data ?? []);
             renderList(items);
-        } catch {
+        } catch (error) {
             if (list) {
-                list.innerHTML = '<p class="user-notifications__empty px-3 py-4 mb-0 text-center text-danger small">Could not load notifications.</p>';
+                const message = error?.message === 'forbidden'
+                    ? 'Notifications are unavailable. Try refreshing the page.'
+                    : 'Could not load notifications.';
+                list.innerHTML = `<div class="user-notifications__empty"><p class="mb-0">${message}</p></div>`;
             }
         }
     };
@@ -127,8 +177,10 @@ export function initUserNotifications() {
         try {
             const data = await fetchJson(routes.unreadCount);
             updateBadge(data.unread_count);
-        } catch {
-            // ignore polling errors
+        } catch (error) {
+            if (error?.message === 'session_expired') {
+                window.clearInterval(pollTimer);
+            }
         }
     };
 
@@ -142,25 +194,12 @@ export function initUserNotifications() {
         await loadFeed();
     };
 
-    const deleteNotification = async (id) => {
-        await fetchJson(routes.destroy(id), { method: 'DELETE' });
-        await loadFeed();
-    };
-
     root.addEventListener('click', async (event) => {
-        const deleteBtn = event.target.closest('[data-notification-delete]');
-        if (deleteBtn) {
-            event.preventDefault();
-            event.stopPropagation();
-            await deleteNotification(deleteBtn.dataset.notificationDelete);
-            return;
-        }
-
         const openLink = event.target.closest('[data-notification-open]');
         if (openLink) {
             const id = openLink.dataset.notificationOpen;
             const item = root.querySelector(`[data-notification-id="${id}"]`);
-            if (item?.classList.contains('user-notifications__item--unread')) {
+            if (item?.classList.contains('fb-notif-row--unread')) {
                 markAsRead(id).catch(() => {});
             }
         }
@@ -176,8 +215,18 @@ export function initUserNotifications() {
         loadFeed();
     });
 
+    toggle?.addEventListener('click', () => {
+        if (isNotificationSoundEnabled(root) && typeof window.AudioContext !== 'undefined') {
+            const ctx = new window.AudioContext();
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
+            ctx.close().catch(() => {});
+        }
+    });
+
     loadFeed();
-    pollTimer = window.setInterval(refreshCount, 60000);
+    pollTimer = window.setInterval(refreshCount, 30000);
 
     window.addEventListener('beforeunload', () => {
         if (pollTimer) {

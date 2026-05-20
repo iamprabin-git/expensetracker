@@ -1,87 +1,115 @@
 <x-user-layout>
     <x-slot name="header">Notifications</x-slot>
-    <x-slot name="subheader">All alerts for reminders, account status, and membership.</x-slot>
-    <x-slot name="headerActions">
-        @if (auth()->user()->unreadNotifications()->exists())
-            <form method="POST" action="{{ route('notifications.read-all') }}" id="mark-all-notifications-form">
-                @csrf
-                <button type="submit" class="btn-secondary-app" onclick="event.preventDefault(); markAllNotificationsRead(this.form);">Mark all as read</button>
-            </form>
-        @endif
-    </x-slot>
+    <x-slot name="subheader"></x-slot>
 
-    <div class="card-panel p-0 overflow-hidden">
-        @forelse ($notifications as $notification)
-            @php
-                $data = $notification->data;
-                $isUnread = $notification->read_at === null;
-            @endphp
-            <div @class(['user-notifications__page-item border-bottom p-3', 'user-notifications__page-item--unread' => $isUnread])>
-                <div class="d-flex align-items-start justify-content-between gap-3">
-                    <div class="min-w-0 flex-grow-1">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge rounded-pill user-notifications__cat user-notifications__cat--{{ $data['category'] ?? 'general' }}">
-                                {{ ucfirst($data['category'] ?? 'general') }}
-                            </span>
-                            @if ($isUnread)
-                                <span class="badge text-bg-primary">New</span>
-                            @endif
-                        </div>
-                        <h2 class="h6 fw-semibold mb-1">{{ $data['title'] ?? 'Notification' }}</h2>
-                        <p class="small text-secondary mb-2">{{ $data['message'] ?? '' }}</p>
-                        <p class="small text-secondary mb-0">{{ $notification->created_at->diffForHumans() }}</p>
-                    </div>
-                    <div class="d-flex flex-column gap-1 flex-shrink-0">
-                        @if (! empty($data['action_url']))
-                            <a href="{{ $data['action_url'] }}" class="btn btn-sm btn-outline-primary"
-                               @if ($isUnread) data-mark-read-on-click="{{ $notification->id }}" @endif>
-                                {{ $data['action_label'] ?? 'View' }}
-                            </a>
-                        @endif
-                        @if ($isUnread)
-                            <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Mark read</button>
-                            </form>
-                        @endif
-                        <form method="POST" action="{{ route('notifications.destroy', $notification->id) }}" onsubmit="return confirm('Delete this notification?')">
+    <div class="fb-notif-page">
+        <div class="fb-notif-page__shell card-panel p-0 overflow-hidden">
+            <div class="fb-notif-page__header">
+                <h1 class="fb-notif-page__title mb-0">Notifications</h1>
+                <div class="fb-notif-page__header-end">
+                    @if ($stats['unread'] > 0)
+                        <form method="POST" action="{{ route('notifications.read-all') }}" id="mark-all-notifications-form" class="mb-0">
                             @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete</button>
+                            <button type="submit" class="fb-notif-page__mark-all" data-notifications-mark-all-btn>
+                                Mark all as read
+                            </button>
                         </form>
-                    </div>
+                    @endif
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="fb-notif-page__close"
+                        data-notifications-close
+                        aria-label="Close notifications"
+                        title="Close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
                 </div>
             </div>
-        @empty
-            <div class="text-center text-secondary py-5 px-3">
-                <p class="mb-0">No notifications yet.</p>
-            </div>
-        @endforelse
-    </div>
 
-    <div class="mt-3">{{ $notifications->links() }}</div>
+            <nav class="fb-notif-page__tabs" aria-label="Filter notifications">
+                <a
+                    href="{{ route('notifications.index') }}"
+                    @class(['fb-notif-page__tab', 'fb-notif-page__tab--active' => $filter === 'all'])
+                >
+                    All
+                </a>
+                <a
+                    href="{{ route('notifications.index', ['filter' => 'unread']) }}"
+                    @class(['fb-notif-page__tab', 'fb-notif-page__tab--active' => $filter === 'unread'])
+                >
+                    Unread
+                    @if ($stats['unread'] > 0)
+                        <span class="fb-notif-page__tab-badge">{{ $stats['unread'] }}</span>
+                    @endif
+                </a>
+            </nav>
+
+            <div class="fb-notif-page__list">
+                @forelse ($notifications as $notification)
+                    @include('notifications.partials.row', ['notification' => $notification])
+                @empty
+                    <div class="fb-notif-page__empty">
+                        <div class="fb-notif-page__empty-icon" aria-hidden="true">🔔</div>
+                        <p class="fw-semibold mb-1">
+                            @if ($filter === 'unread')
+                                You're all caught up
+                            @else
+                                No notifications yet
+                            @endif
+                        </p>
+                        <p class="small text-secondary mb-0">
+                            @if ($filter === 'unread')
+                                When you get new alerts, they'll show up here.
+                            @else
+                                Reminders and account updates will appear here.
+                            @endif
+                        </p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        @if ($notifications->hasPages())
+            <div class="fb-notif-page__pagination mt-3">
+                {{ $notifications->links() }}
+            </div>
+        @endif
+    </div>
 
     @push('scripts')
         <script>
-            async function markAllNotificationsRead(form) {
+            document.querySelector('[data-notifications-close]')?.addEventListener('click', (event) => {
+                if (window.history.length > 1 && document.referrer && document.referrer !== window.location.href) {
+                    event.preventDefault();
+                    window.history.back();
+                }
+            });
+
+            document.querySelector('[data-notifications-mark-all-btn]')?.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const form = document.getElementById('mark-all-notifications-form');
                 const response = await fetch(form.action, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
                 if (response.ok) window.location.reload();
-            }
+            });
 
             document.querySelectorAll('[data-mark-read-on-click]').forEach((link) => {
                 link.addEventListener('click', () => {
-                    const id = link.dataset.markReadOnClick;
-                    fetch(`{{ url('/notifications') }}/${id}/read`, {
+                    fetch(`{{ url('/notifications') }}/${link.dataset.markReadOnClick}/read`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
+                            Accept: 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                         },
                     });
                 });

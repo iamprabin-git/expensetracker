@@ -6,6 +6,7 @@ use App\Enums\TransactionType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Transaction extends Model
 {
@@ -18,6 +19,7 @@ class Transaction extends Model
         'title',
         'amount',
         'description',
+        'receipt_image_path',
         'transaction_date',
     ];
 
@@ -43,5 +45,34 @@ class Transaction extends Model
     public function isIncome(): bool
     {
         return $this->type === TransactionType::Income;
+    }
+
+    public function isExpense(): bool
+    {
+        return $this->type === TransactionType::Expense;
+    }
+
+    public function amountPrefix(): string
+    {
+        return $this->type->amountPrefix();
+    }
+
+    public function amountColorClass(): string
+    {
+        return $this->type->amountColorClass();
+    }
+
+    public function typeBadgeClass(): string
+    {
+        return $this->type->badgeClass();
+    }
+
+    public function receiptImageUrl(): ?string
+    {
+        if (! filled($this->receipt_image_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->receipt_image_path);
     }
 }

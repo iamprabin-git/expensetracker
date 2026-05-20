@@ -42,8 +42,8 @@
                     <a href="{{ route('transactions.index') }}" class="text-sm text-indigo-600 dark:text-indigo-400">View all</a>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                <div class="table-responsive table-scroll-touch">
+                    <table class="table table-hover align-middle mb-0 table-mobile-stack">
                         <thead>
                             <tr class="text-secondary">
                                 <th>Title</th>
@@ -55,8 +55,8 @@
                         <tbody>
                             @forelse ($transactions as $transaction)
                                 <tr>
-                                    <td class="fw-medium">{{ $transaction->title }}</td>
-                                    <td class="d-none d-md-table-cell">
+                                    <td class="fw-medium" data-label="Title">{{ $transaction->title }}</td>
+                                    <td class="d-none d-md-table-cell" data-label="Category">
                                         @if ($transaction->category)
                                             <span class="badge rounded-pill" style="background-color: {{ $transaction->category->color }}20; color: {{ $transaction->category->color }}">
                                                 {{ $transaction->category->name }}
@@ -65,9 +65,9 @@
                                             —
                                         @endif
                                     </td>
-                                    <td>{{ $transaction->transaction_date->format('M d, Y') }}</td>
-                                    <td class="text-end fw-semibold {{ $transaction->isIncome() ? 'text-emerald-600' : 'text-rose-600' }}">
-                                        {{ $transaction->isIncome() ? '+' : '-' }}<x-money :amount="$transaction->amount" />
+                                    <td data-label="Date">{{ $transaction->transaction_date->format('M d, Y') }}</td>
+                                    <td @class(['text-end fw-semibold', $transaction->amountColorClass()]) data-label="Amount">
+                                        {{ $transaction->amountPrefix() }}<x-money :amount="$transaction->amount" />
                                     </td>
                                 </tr>
                             @empty

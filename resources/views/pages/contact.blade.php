@@ -1,25 +1,49 @@
-<x-marketing-layout title="Contact" metaDescription="Contact the ExpenseTracker team for support, sales, or partnership inquiries.">
-    @include('pages.partials.page-hero', [
-        'badge' => 'Contact',
-        'title' => 'We would love to hear from you',
-        'lead' => 'Questions about your account, pricing, or partnerships? Send us a message.',
-    ])
+@php
+    $contactInfo = collect($page->sectionList())->firstWhere('type', 'contact_info');
+    $contactItems = collect($contactInfo['items'] ?? []);
+
+    if ($company?->email && ! $contactItems->contains(fn ($i) => ($i['title'] ?? '') === 'Email')) {
+        $contactItems->prepend(['title' => 'Email', 'text' => $company->email]);
+    }
+    if ($company?->phone && ! $contactItems->contains(fn ($i) => ($i['title'] ?? '') === 'Phone')) {
+        $contactItems->push(['title' => 'Phone', 'text' => $company->phone]);
+    }
+    if ($company?->support_hours && ! $contactItems->contains(fn ($i) => ($i['title'] ?? '') === 'Hours')) {
+        $contactItems->push(['title' => 'Hours', 'text' => $company->support_hours]);
+    }
+    if ($company?->formattedAddress() && ! $contactItems->contains(fn ($i) => ($i['title'] ?? '') === 'Address')) {
+        $contactItems->push(['title' => 'Address', 'text' => $company->formattedAddress()]);
+    }
+@endphp
+
+<x-marketing-layout :title="$page->title" :metaDescription="$page->meta_description">
+    @include('pages.partials.cms-hero', ['page' => $page])
 
     <section class="site-section pt-0">
         <div class="container">
             <div class="row g-5">
                 <div class="col-lg-5">
                     <div class="card-panel h-100">
-                        <h2 class="h5 fw-semibold mb-3">Get in touch</h2>
+                        <h2 class="h5 fw-semibold mb-3">{{ $page->extra('sidebar_title', 'Get in touch') }}</h2>
                         <ul class="list-unstyled text-secondary small mb-0 d-grid gap-3">
-                            <li><strong class="text-body">Email</strong><br>support@expensetracker.test</li>
-                            <li><strong class="text-body">Hours</strong><br>Mon–Fri, 9am–6pm (UTC)</li>
-                            <li><strong class="text-body">Response time</strong><br>Within 2 business days</li>
+                            @foreach ($contactItems as $item)
+                                <li>
+                                    @if (! empty($item['title']))
+                                        <strong class="text-body">{{ $item['title'] }}</strong><br>
+                                    @endif
+                                    @if (($item['title'] ?? '') === 'Email' && ! empty($item['text']))
+                                        <a href="mailto:{{ $item['text'] }}">{{ $item['text'] }}</a>
+                                    @else
+                                        {!! nl2br(e($item['text'] ?? '')) !!}
+                                    @endif
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-7">
                     <div class="card-panel">
+                        <h2 class="h5 fw-semibold mb-3">{{ $page->extra('form_title', 'Send a message') }}</h2>
                         @if (session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
