@@ -1,7 +1,7 @@
 <x-marketing-layout :title="$title ?? null" narrow>
-    <div class="container px-3 px-sm-4 w-100">
-        <div class="site-auth-card">
+    <div class="mx-auto w-full max-w-lg px-4">
+        <x-ui.card class="site-auth-card">
             {{ $slot }}
-        </div>
+        </x-ui.card>
     </div>
 </x-marketing-layout>

@@ -12,7 +12,7 @@
     <div class="user-notifications__card-inner">
         @include('notifications.partials.icon', ['category' => $category])
 
-        <div class="user-notifications__card-body min-w-0 flex-grow-1">
+        <div class="user-notifications__card-body min-w-0 flex-1">
             <div class="user-notifications__card-meta">
                 <span class="user-notifications__pill user-notifications__pill--{{ $category }}">
                     {{ $meta['label'] }}
@@ -40,7 +40,7 @@
                 </a>
             @endif
             @if ($isUnread)
-                <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="d-inline">
+                <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn btn-sm btn-outline-secondary user-notifications__btn-action">
                         Mark read
@@ -50,7 +50,7 @@
             <form
                 method="POST"
                 action="{{ route('notifications.destroy', $notification->id) }}"
-                class="d-inline"
+                class="inline"
                 onsubmit="return confirm('Delete this notification?')"
             >
                 @csrf

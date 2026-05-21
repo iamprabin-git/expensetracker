@@ -2,88 +2,19 @@
 
 @section('title', $reportTitle)
 
+@push('styles')
+    @vite(['resources/css/statement.css'])
+@endpush
+
 @section('content')
     @include('reports.partials.filters')
-    @include('reports.partials.header')
 
-    <div class="report-page report-page-wrap card-panel bg-white mx-auto">
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-4">
-                <div class="rounded-3 border p-3 text-center">
-                    <p class="small text-secondary mb-1">Income</p>
-                    <p class="fw-bold text-success mb-0">{{ $user->formatMoney($totals['income']) }}</p>
-                </div>
-            </div>
-            <div class="col-12 col-sm-4">
-                <div class="rounded-3 border p-3 text-center">
-                    <p class="small text-secondary mb-1">Expenses</p>
-                    <p class="fw-bold text-danger mb-0">{{ $user->formatMoney($totals['expense']) }}</p>
-                </div>
-            </div>
-            <div class="col-12 col-sm-4">
-                <div class="rounded-3 border p-3 text-center">
-                    <p class="small text-secondary mb-1">Net balance</p>
-                    <p class="fw-bold mb-0 {{ $totals['balance'] >= 0 ? 'text-primary' : 'text-danger' }}">
-                        {{ $user->formatMoney($totals['balance']) }}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="table-responsive table-scroll-touch">
-            <table class="table table-bordered align-middle mb-0 table-mobile-stack">
-                <thead class="table-light">
-                    <tr>
-                        <th>Date</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Type</th>
-                        <th class="text-end">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($transactions as $transaction)
-                        <tr>
-                            <td class="text-nowrap" data-label="Date">{{ $transaction->transaction_date->format('M d, Y') }}</td>
-                            <td data-label="Title">
-                                <span class="fw-medium">{{ $transaction->title }}</span>
-                                @if ($transaction->description)
-                                    <br><span class="small text-secondary">{{ $transaction->description }}</span>
-                                @endif
-                            </td>
-                            <td data-label="Category">{{ $transaction->category?->name ?? '—' }}</td>
-                            <td data-label="Type">{{ $transaction->type->label() }}</td>
-                            <td @class(['text-end fw-semibold', $transaction->amountColorClass()]) data-label="Amount">
-                                {{ $transaction->amountPrefix() }}{{ $user->formatMoney((float) $transaction->amount) }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-secondary py-4">No transactions in this period.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-                @if ($transactions->isNotEmpty())
-                    <tfoot class="table-light">
-                        <tr>
-                            <th colspan="4" class="text-end">Total income</th>
-                            <th class="text-end text-success">{{ $user->formatMoney($totals['income']) }}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="4" class="text-end">Total expenses</th>
-                            <th class="text-end text-danger">{{ $user->formatMoney($totals['expense']) }}</th>
-                        </tr>
-                        <tr>
-                            <th colspan="4" class="text-end">Net balance</th>
-                            <th class="text-end">{{ $user->formatMoney($totals['balance']) }}</th>
-                        </tr>
-                    </tfoot>
-                @endif
-            </table>
-        </div>
-
-        <p class="small text-secondary mt-4 mb-0">
-            This statement lists {{ $totals['count'] }} transaction(s). Generated from your recorded income and expenses.
-        </p>
-    </div>
+    @include('statements.partials.document', [
+        'user' => $user,
+        'transactions' => $transactions,
+        'totals' => $totals,
+        'periodLabel' => $periodLabel,
+        'generatedAt' => $generatedAt,
+        'documentTitle' => $reportTitle,
+    ])
 @endsection

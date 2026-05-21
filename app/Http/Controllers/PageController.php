@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContactMessage;
 use App\Models\Review;
 use App\Services\SiteContentService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,11 +18,7 @@ class PageController extends Controller
 
     public function home(): View
     {
-        $reviews = Review::query()
-            ->approved()
-            ->latest('approved_at')
-            ->limit(6)
-            ->get(['display_name', 'rating', 'content', 'approved_at']);
+        $reviews = $this->approvedReviewsForCarousel();
 
         return view('pages.home', [
             'page' => $this->siteContent->get('home'),
@@ -107,16 +104,23 @@ class PageController extends Controller
         $reviews = collect();
 
         if ($page->hasReviewsSection()) {
-            $reviews = Review::query()
-                ->approved()
-                ->latest('approved_at')
-                ->limit(6)
-                ->get(['display_name', 'rating', 'content', 'approved_at']);
+            $reviews = $this->approvedReviewsForCarousel();
         }
 
         return view('pages.show', [
             'page' => $page,
             'reviews' => $reviews,
         ]);
+    }
+
+    /** @return Collection<int, Review> */
+    private function approvedReviewsForCarousel()
+    {
+        return Review::query()
+            ->approved()
+            ->with(['user:id,name,avatar_path,google_id,google_avatar'])
+            ->latest('approved_at')
+            ->limit(6)
+            ->get(['id', 'user_id', 'display_name', 'rating', 'content', 'approved_at']);
     }
 }

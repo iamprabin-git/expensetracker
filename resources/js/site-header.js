@@ -76,8 +76,9 @@ export function initSiteHeader() {
             const target = event.target;
             const clickedInsidePanel = panel.contains(target);
             const clickedToggle = Array.from(toggles).some((toggle) => toggle.contains(target));
+            const clickedThemeToggle = target.closest('[data-theme-toggle]');
 
-            if (!clickedInsidePanel && !clickedToggle) {
+            if (!clickedInsidePanel && !clickedToggle && !clickedThemeToggle) {
                 closeMenu();
             }
         },

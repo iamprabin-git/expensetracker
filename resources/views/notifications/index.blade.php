@@ -53,14 +53,14 @@
                 @empty
                     <div class="fb-notif-page__empty">
                         <div class="fb-notif-page__empty-icon" aria-hidden="true">🔔</div>
-                        <p class="fw-semibold mb-1">
+                        <p class="font-semibold mb-1">
                             @if ($filter === 'unread')
                                 You're all caught up
                             @else
                                 No notifications yet
                             @endif
                         </p>
-                        <p class="small text-secondary mb-0">
+                        <p class="text-sm text-muted-foreground mb-0">
                             @if ($filter === 'unread')
                                 When you get new alerts, they'll show up here.
                             @else

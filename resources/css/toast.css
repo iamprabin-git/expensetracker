@@ -1,0 +1,50 @@
+/* Toastify — aligned with site theme */
+
+.toastify {
+    font-family: Figtree, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.45;
+    border-radius: 0.625rem;
+    box-shadow:
+        0 10px 15px -3px rgb(0 0 0 / 0.12),
+        0 4px 6px -4px rgb(0 0 0 / 0.08);
+    padding: 0.75rem 1rem;
+    max-width: min(22rem, calc(100vw - 2rem));
+}
+
+.toastify .toast-close {
+    opacity: 0.85;
+    color: inherit;
+}
+
+.toastify.on {
+    opacity: 1;
+}
+
+.dark .toastify.app-toast--success {
+    background: oklch(0.42 0.12 155) !important;
+    color: oklch(0.96 0.02 155) !important;
+}
+
+.dark .toastify.app-toast--error {
+    background: oklch(0.48 0.16 25) !important;
+    color: oklch(0.97 0.02 25) !important;
+}
+
+.dark .toastify.app-toast--info {
+    background: oklch(0.42 0.1 264) !important;
+    color: oklch(0.96 0.02 264) !important;
+}
+
+.dark .toastify.app-toast--warning {
+    background: oklch(0.55 0.12 75) !important;
+    color: oklch(0.18 0.04 75) !important;
+}
+
+@media (max-width: 575.98px) {
+    .toastify {
+        margin-right: 0.5rem;
+        max-width: calc(100vw - 1.5rem);
+    }
+}

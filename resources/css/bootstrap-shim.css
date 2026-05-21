@@ -1,0 +1,240 @@
+/**
+ * Minimal Bootstrap-compatible styles for JS plugins (dropdown, modal, collapse)
+ * and legacy .btn / .alert classes — styled with shadcn tokens.
+ */
+
+@layer components {
+    /* —— Grid (legacy row/col) —— */
+    .row {
+        @apply grid grid-cols-12 gap-4;
+    }
+
+    .g-3 {
+        @apply gap-3;
+    }
+
+    .g-4,
+    .g-md-4 {
+        @apply gap-4;
+    }
+
+    /* —— Buttons —— */
+    .btn {
+        @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-sm {
+        @apply h-8 rounded-md px-3 text-xs;
+    }
+
+    .btn-lg {
+        @apply h-10 rounded-md px-6;
+    }
+
+    .btn-primary,
+    .btn.site-btn-primary {
+        @apply bg-primary text-primary-foreground shadow-xs hover:bg-primary/90;
+    }
+
+    .btn-secondary {
+        @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+    }
+
+    .btn-success {
+        @apply bg-emerald-600 text-white hover:bg-emerald-600/90;
+    }
+
+    .btn-danger {
+        @apply bg-destructive text-white hover:bg-destructive/90;
+    }
+
+    .btn-outline-primary {
+        @apply border border-primary/40 bg-background text-primary hover:bg-primary/10;
+    }
+
+    .btn-outline-secondary,
+    .btn.site-btn-outline {
+        @apply border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground;
+    }
+
+    .btn-outline-danger {
+        @apply border border-destructive/40 text-destructive hover:bg-destructive/10;
+    }
+
+    .btn-light {
+        @apply border border-border bg-card text-foreground hover:bg-accent;
+    }
+
+    .btn-outline-light {
+        @apply border border-white/40 bg-transparent text-white hover:bg-white/10;
+    }
+
+    .btn-link {
+        @apply h-auto border-0 bg-transparent p-0 text-primary underline-offset-4 hover:underline;
+    }
+
+    .btn-close {
+        @apply inline-flex size-8 items-center justify-center rounded-sm opacity-70 transition hover:opacity-100;
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    }
+
+    /* —— Alerts —— */
+    .alert {
+        @apply relative w-full rounded-lg border px-4 py-3 text-sm;
+    }
+
+    .alert-success {
+        @apply border-emerald-500/40 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-50;
+    }
+
+    .alert-danger {
+        @apply border-destructive/50 bg-destructive/10 text-destructive;
+    }
+
+    .alert-warning {
+        @apply border-amber-500/40 bg-amber-50 text-amber-950 dark:bg-amber-950/30 dark:text-amber-50;
+    }
+
+    .alert-info {
+        @apply border-sky-500/40 bg-sky-50 text-sky-950 dark:bg-sky-950/30 dark:text-sky-50;
+    }
+
+    /* —— Tables —— */
+    .table {
+        @apply w-full caption-bottom text-sm;
+    }
+
+    .table th {
+        @apply h-10 px-2 text-left align-middle font-medium text-muted-foreground;
+    }
+
+    .table td {
+        @apply p-2 align-middle;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        @apply border border-border;
+    }
+
+    /* —— Dropdown (Bootstrap JS) —— */
+    .dropdown {
+        @apply relative inline-block;
+    }
+
+    .dropdown-menu {
+        @apply absolute z-50 mt-1 hidden min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md;
+    }
+
+    .dropdown-menu.show {
+        @apply block;
+    }
+
+    .dropdown-menu-end {
+        right: 0;
+        left: auto;
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+
+    .dropdown-item {
+        @apply relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground;
+    }
+
+    .dropdown-divider {
+        @apply my-1 h-px bg-border;
+    }
+
+    /* —— Modal (Bootstrap JS) —— */
+    .modal {
+        @apply fixed inset-0 z-50 hidden overflow-y-auto;
+    }
+
+    .modal.show {
+        @apply block;
+    }
+
+    .modal-dialog {
+        @apply relative mx-auto my-8 w-full max-w-lg px-4;
+    }
+
+    .modal-content {
+        @apply rounded-xl border border-border bg-card text-card-foreground shadow-lg;
+    }
+
+    .modal-header {
+        @apply flex items-center justify-between border-b border-border px-4 py-3;
+    }
+
+    .modal-body {
+        @apply px-4 py-4;
+    }
+
+    .modal-footer {
+        @apply flex justify-end gap-2 border-t border-border px-4 py-3;
+    }
+
+    .modal-backdrop {
+        @apply fixed inset-0 z-40 bg-black/50;
+    }
+
+    .modal-backdrop.show {
+        @apply block;
+    }
+
+    /* —— Collapse / accordion (Bootstrap JS) —— */
+    .collapse:not(.show) {
+        display: none;
+    }
+
+    .collapse.show {
+        display: block;
+    }
+
+    .accordion-button {
+        @apply flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-left text-sm font-medium transition hover:bg-accent;
+    }
+
+    .accordion-button.collapsed {
+        @apply rounded-lg;
+    }
+
+    .accordion-body {
+        @apply border border-t-0 border-border px-4 py-3 text-sm text-muted-foreground;
+    }
+
+    /* —— Pagination —— */
+    .pagination {
+        @apply flex flex-wrap items-center justify-center gap-1;
+    }
+
+    .page-link {
+        @apply inline-flex h-9 min-w-9 items-center justify-center rounded-md border border-input bg-background px-3 text-sm hover:bg-accent;
+    }
+
+    .page-item.active .page-link {
+        @apply border-primary bg-primary text-primary-foreground;
+    }
+
+    .badge {
+        @apply inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold;
+    }
+
+    .rounded-pill {
+        @apply rounded-full;
+    }
+
+    .sticky-top {
+        @apply sticky top-0 z-30;
+    }
+
+    .border-bottom {
+        @apply border-b border-border;
+    }
+
+    .text-uppercase {
+        @apply uppercase;
+    }
+}

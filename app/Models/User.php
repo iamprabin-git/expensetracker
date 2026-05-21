@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Notifications\AccountApprovedNotification;
+use App\Notifications\UserPasswordResetNotification;
+use App\Services\ReceiptScanService;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -11,7 +14,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Notifications\UserPasswordResetNotification;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\Storage;
     'email',
     'google_id',
     'google_token',
+    'google_avatar',
     'password',
     'role',
     'avatar_path',
@@ -64,7 +67,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatarUrl();
+        return $this->profilePhotoUrl();
     }
 
     public function isAdmin(): bool
@@ -97,7 +100,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             return false;
         }
 
-        return app(\App\Services\ReceiptScanService::class)->isConfigured();
+        return app(ReceiptScanService::class)->isConfigured();
     }
 
     public function hasActiveMembership(): bool
@@ -134,7 +137,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         ]);
 
         if (! $wasApproved && $this->isRegularUser()) {
-            $this->notify(new \App\Notifications\AccountApprovedNotification);
+            $this->notify(new AccountApprovedNotification);
         }
     }
 
@@ -178,6 +181,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
 
         return Storage::disk('public')->url($this->avatar_path);
+    }
+
+    /** Uploaded avatar, else Google profile photo from sign-in. */
+    public function profilePhotoUrl(): ?string
+    {
+        if ($this->avatar_path) {
+            return $this->avatarUrl();
+        }
+
+        if (filled($this->google_avatar)) {
+            return $this->google_avatar;
+        }
+
+        return null;
     }
 
     public function initials(): string

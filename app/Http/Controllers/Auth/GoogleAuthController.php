@@ -34,13 +34,12 @@ class GoogleAuthController extends Controller
             ->first();
 
         if ($user) {
-            if (! $user->google_id) {
-                $user->update([
-                    'google_id' => $googleUser->getId(),
-                    'google_token' => $googleUser->token,
-                    'email_verified_at' => $user->email_verified_at ?? now(),
-                ]);
-            }
+            $user->update([
+                'google_id' => $user->google_id ?? $googleUser->getId(),
+                'google_token' => $googleUser->token,
+                'google_avatar' => $googleUser->getAvatar() ?? $user->google_avatar,
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ]);
 
             Auth::login($user, remember: true);
 
@@ -55,6 +54,7 @@ class GoogleAuthController extends Controller
             plainPassword: $plainPassword,
             googleId: $googleUser->getId(),
             googleToken: $googleUser->token,
+            googleAvatar: $googleUser->getAvatar(),
             emailVerified: true,
         );
 

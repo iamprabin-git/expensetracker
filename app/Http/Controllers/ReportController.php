@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\FinancialReportBuilder;
+use App\Services\ReportExportService;
+use App\Support\TabularExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -63,6 +66,28 @@ class ReportController extends Controller
             ->setPaper('a4', 'portrait');
 
         return $pdf->download($filename);
+    }
+
+    public function export(Request $request, string $report, string $format): StreamedResponse
+    {
+        abort_unless(in_array($format, ['csv', 'xlsx'], true), 404);
+
+        $config = $this->config($report);
+        $builder = $this->builder($request);
+        $exporter = new ReportExportService(
+            $request->user(),
+            $builder,
+            $report,
+            $config['title'],
+        );
+        $dataset = $exporter->dataset();
+        $extension = $format === 'xlsx' ? 'xlsx' : 'csv';
+        $filename = $exporter->filename($extension);
+
+        return match ($format) {
+            'csv' => TabularExporter::downloadCsv($filename, $dataset['headers'], $dataset['rows']),
+            'xlsx' => TabularExporter::downloadXlsx($filename, $dataset['headers'], $dataset['rows']),
+        };
     }
 
     private function builder(Request $request): FinancialReportBuilder

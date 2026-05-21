@@ -1,0 +1,101 @@
+/* Mobile-first responsive helpers (all devices) */
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+}
+
+@layer components {
+    /* Touch-friendly minimum targets */
+    .btn,
+    .user-shell__menu-btn,
+    .site-header__toggle,
+    .settings-page__nav-link {
+        min-height: 2.75rem;
+    }
+
+    [data-theme-toggle] {
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+        pointer-events: auto;
+        touch-action: manipulation;
+    }
+
+    @media (max-width: 767.98px) {
+        .site-auth-card {
+            @apply p-4;
+        }
+
+        .user-panel-header__inner {
+            @apply px-2;
+        }
+
+        .user-page-header__actions > .btn,
+        .user-page-header__actions > a[class*='inline-flex'],
+        .user-page-header__actions > form {
+            @apply w-full flex-1 min-w-0;
+        }
+
+        .user-page-header__actions > form button,
+        .user-page-header__actions > form [type='submit'] {
+            @apply w-full;
+        }
+
+        .card-panel .flex.gap-2 > .btn,
+        .card-panel .flex.gap-2 > a[class*='inline-flex'] {
+            @apply min-h-11 flex-1;
+        }
+
+        .report-toolbar .flex.flex-wrap,
+        .statement-toolbar .flex.flex-wrap {
+            @apply w-full flex-col items-stretch;
+        }
+
+        .report-toolbar .flex.flex-wrap > *,
+        .statement-toolbar .flex.flex-wrap > * {
+            @apply w-full min-w-0;
+        }
+
+        .site-hero .btn-lg,
+        .site-hero .btn {
+            @apply w-full;
+        }
+
+        .modal-dialog {
+            @apply mx-2 max-w-[calc(100vw-1rem)];
+        }
+
+        .dropdown-menu {
+            max-width: min(22.5rem, calc(100vw - 1rem));
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .user-shell__container {
+            @apply px-3;
+        }
+
+        .analysis-kpi__value {
+            @apply text-xl;
+        }
+    }
+}

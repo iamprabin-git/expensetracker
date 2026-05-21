@@ -1,77 +1,183 @@
+@push('styles')
+    @vite(['resources/css/reviews-carousel.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/reviews-carousel.js'])
+@endpush
+
 <section class="site-section site-section--muted" id="reviews">
-    <div class="container">
-        <div class="text-center mx-auto mb-5" style="max-width: 40rem;">
+    <div class="mx-auto w-full max-w-6xl px-4">
+        <div class="mx-auto mb-8 max-w-3xl text-center">
             <h2 class="site-section-title">{{ $sectionTitle ?? 'What members say' }}</h2>
             <p class="site-section-lead">{{ $sectionSubtitle ?? 'Reviews are submitted on this page and published only after admin approval. We never show private account or financial data.' }}</p>
         </div>
 
-        @if (session('success') || session('info'))
-            <div class="row justify-content-center mb-4">
-                <div class="col-lg-8">
-                    @if (session('success'))
-                        <div class="alert alert-success mb-0">{{ session('success') }}</div>
-                    @endif
-                    @if (session('info'))
-                        <div class="alert alert-info mb-0">{{ session('info') }}</div>
+        <div class="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
+            {{-- Left: reviews carousel --}}
+            <div class="reviews-split__carousel">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                    <h3 class="text-lg font-semibold text-foreground">Member reviews</h3>
+                    @if ($reviews->isNotEmpty())
+                        <span class="text-xs text-muted-foreground">{{ $reviews->count() }} approved</span>
                     @endif
                 </div>
-            </div>
-        @endif
 
-        @if ($reviews->isNotEmpty())
-            <div class="row g-4 mb-5">
-                @foreach ($reviews as $review)
-                    <div class="col-md-6 col-lg-4">
-                        <article class="site-feature-card h-100">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <strong class="text-slate-900 dark:text-white">{{ $review->display_name }}</strong>
-                                <span class="text-warning" aria-label="{{ $review->rating }} out of 5 stars">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        {{ $i <= $review->rating ? '★' : '☆' }}
-                                    @endfor
-                                </span>
+                @if ($reviews->isNotEmpty())
+                    <div class="swiper reviews-swiper flex-1" data-reviews-swiper>
+                        <div class="swiper-wrapper">
+                            @foreach ($reviews as $review)
+                                <div class="swiper-slide">
+                                    <article class="reviews-swiper-card">
+                                        <blockquote class="reviews-swiper-card__quote">
+                                            {{ $review->content }}
+                                        </blockquote>
+                                        <footer class="reviews-swiper-card__footer flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                                            @include('pages.partials.review-author', ['review' => $review])
+                                            @include('pages.partials.review-stars', ['rating' => $review->rating, 'size' => 'lg', 'class' => 'shrink-0 self-start sm:self-center'])
+                                        </footer>
+                                    </article>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="reviews-swiper-controls">
+                            <div class="reviews-swiper-nav">
+                                <button type="button" class="reviews-swiper-prev" aria-label="Previous review">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.56 9.5H16a.75.75 0 0 1 0 1.5H8.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.25a.75.75 0 0 1 0-1.06l4.5-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <button type="button" class="reviews-swiper-next" aria-label="Next review">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.44 11H4a.75.75 0 0 1 0-1.5h7.44L8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
-                            <p class="text-secondary mb-2 small">{{ \Illuminate\Support\Str::limit($review->content, 180) }}</p>
-                            <p class="text-secondary mb-0" style="font-size:0.75rem;">{{ $review->approved_at?->format('M Y') }}</p>
-                        </article>
+                            <div class="reviews-swiper-pagination"></div>
+                        </div>
                     </div>
-                @endforeach
+                @else
+                    <div class="reviews-swiper-empty flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mb-3 size-10 text-primary/40" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+                        </svg>
+                        <p class="mb-1 text-sm font-medium text-foreground">No reviews yet</p>
+                        <p class="text-sm">Be the first to share your experience using the form.</p>
+                    </div>
+                @endif
             </div>
-        @else
-            <p class="text-center text-secondary mb-5">Approved reviews will appear here. Submit yours below.</p>
-        @endif
 
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card-panel">
-                    <h3 class="h5 fw-semibold mb-3">Submit a review</h3>
-                    <p class="small text-secondary mb-3">Your review is sent from the website and shown publicly only after an admin approves it. Only your display name and review text are published — never your email or transactions.</p>
-                    <form method="POST" action="{{ route('reviews.store') }}" class="row g-3">
+            {{-- Right: submit form --}}
+            <div class="flex flex-col">
+                <x-ui.card
+                    class="h-full"
+                    title="Submit a review"
+                    description="Published only after admin approval. We never show your email or financial data."
+                >
+                    @auth
+                        <div class="mb-5 flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-3">
+                            <x-user-avatar :user="auth()->user()" size="lg" />
+                            <div class="min-w-0">
+                                <p class="font-semibold text-foreground">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-muted-foreground">
+                                    @if (auth()->user()->google_id)
+                                        Signed in with Google
+                                        <span class="mx-1 opacity-50" aria-hidden="true">·</span>
+                                    @endif
+                                    {{ now()->format('F j, Y') }}
+                                </p>
+                            </div>
+                        </div>
+                    @endauth
+
+                    <form
+                        method="POST"
+                        action="{{ route('reviews.store') }}"
+                        class="space-y-5"
+                        x-data="{
+                            rating: {{ (int) old('rating', 5) }},
+                            contentLength: {{ strlen(old('content', '')) }}
+                        }"
+                    >
                         @csrf
-                        <div class="col-md-6">
-                            <label class="label-app" for="display_name">Public display name</label>
-                            <input type="text" name="display_name" id="display_name" class="input-app form-control @error('display_name') is-invalid @enderror" value="{{ old('display_name', auth()->user()?->name) }}" maxlength="80" required>
-                            @error('display_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+
+                        <div class="space-y-2">
+                            <x-ui.label for="display_name">Public display name</x-ui.label>
+                            <x-ui.input
+                                type="text"
+                                name="display_name"
+                                id="display_name"
+                                value="{{ old('display_name', auth()->user()?->name) }}"
+                                maxlength="80"
+                                required
+                                placeholder="e.g. Alex M."
+                                @class(['border-destructive ring-destructive/20' => $errors->has('display_name')])
+                            />
+                            <x-ui.field-error :messages="$errors->get('display_name')" />
                         </div>
-                        <div class="col-md-6">
-                            <label class="label-app" for="rating">Rating</label>
-                            <select name="rating" id="rating" class="input-app form-select @error('rating') is-invalid @enderror" required>
-                                @for ($r = 5; $r >= 1; $r--)
-                                    <option value="{{ $r }}" @selected(old('rating', 5) == $r)>{{ $r }} stars</option>
+
+                        <div class="space-y-2">
+                            <x-ui.label id="rating-label">Rating</x-ui.label>
+                            <input type="hidden" name="rating" :value="rating">
+                            <div
+                                class="flex h-9 items-center gap-1 rounded-md border border-input bg-background px-3 dark:bg-input/30"
+                                role="radiogroup"
+                                aria-labelledby="rating-label"
+                            >
+                                @for ($star = 1; $star <= 5; $star++)
+                                    <button
+                                        type="button"
+                                        class="rounded p-0.5 text-amber-500 transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-amber-400"
+                                        :class="rating >= {{ $star }} ? 'opacity-100' : 'opacity-30'"
+                                        @click="rating = {{ $star }}"
+                                        :aria-checked="rating === {{ $star }}"
+                                        aria-label="{{ $star }} {{ $star === 1 ? 'star' : 'stars' }}"
+                                        role="radio"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                            <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.052 2.52c-.192.46-.597.788-1.065.98l-2.52 1.052a.92.92 0 00-.53 1.567l1.919 1.566c.365.298.526.78.433 1.24l-.6 2.47a.92.92 0 001.33 1.003l2.194-1.337a.92.92 0 011.124 0l2.194 1.337a.92.92 0 001.33-1.003l-.6-2.47a.92.92 0 00.433-1.24l1.919-1.566a.92.92 0 00-.53-1.567l-2.52-1.052a.92.92 0 00-1.065-.98l-1.052-2.52z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
                                 @endfor
-                            </select>
-                            @error('rating')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <span class="ml-2 text-sm text-muted-foreground" x-text="rating + ' / 5'"></span>
+                            </div>
+                            <x-ui.field-error :messages="$errors->get('rating')" />
                         </div>
-                        <div class="col-12">
-                            <label class="label-app" for="content">Your review</label>
-                            <textarea name="content" id="content" rows="4" class="input-app form-control @error('content') is-invalid @enderror" required minlength="20" maxlength="2000" placeholder="Tell others about your experience…">{{ old('content') }}</textarea>
-                            @error('content')<div class="invalid-feedback">{{ $message }}</div>@enderror
+
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <x-ui.label for="content">Your review</x-ui.label>
+                                <span
+                                    class="text-xs text-muted-foreground"
+                                    x-text="contentLength + ' / 2000'"
+                                ></span>
+                            </div>
+                            <textarea
+                                name="content"
+                                id="content"
+                                rows="5"
+                                required
+                                minlength="20"
+                                maxlength="2000"
+                                placeholder="Tell others about your experience…"
+                                @input="contentLength = $event.target.value.length"
+                                class="flex min-h-[6.5rem] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30 {{ $errors->has('content') ? 'border-destructive ring-destructive/20' : '' }}"
+                            >{{ old('content') }}</textarea>
+                            <p class="text-xs text-muted-foreground">Minimum 20 characters. Your photo may appear after approval if you signed in with Google.</p>
+                            <x-ui.field-error :messages="$errors->get('content')" />
                         </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn site-btn-primary">Submit for approval</button>
+
+                        <div class="border-t border-border pt-4">
+                            <x-ui.button type="submit" class="w-full">
+                                Submit for approval
+                            </x-ui.button>
+                            <p class="mt-3 text-center text-xs text-muted-foreground">
+                                Only your display name and review text may be shown publicly.
+                            </p>
                         </div>
                     </form>
-                </div>
+                </x-ui.card>
             </div>
         </div>
     </div>

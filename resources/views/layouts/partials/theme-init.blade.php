@@ -2,8 +2,15 @@
     (function () {
         const stored = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (stored === 'dark' || (!stored && prefersDark)) {
-            document.documentElement.classList.add('dark');
+        const isDark = stored === 'dark' || (stored !== 'light' && prefersDark);
+        const root = document.documentElement;
+
+        if (isDark) {
+            root.classList.add('dark');
+            root.style.colorScheme = 'dark';
+        } else {
+            root.classList.remove('dark');
+            root.style.colorScheme = 'light';
         }
     })();
 </script>

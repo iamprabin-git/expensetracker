@@ -1,7 +1,7 @@
 <x-user-layout>
     <x-slot name="header">Edit reminder</x-slot>
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
+    <div class="grid grid-cols-12 gap-4 justify-center">
+        <div class="col-span-12 lg:col-span-8">
             @include('reminders._form', ['reminder' => $reminder])
         </div>
     </div>

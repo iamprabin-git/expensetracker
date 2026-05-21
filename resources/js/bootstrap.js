@@ -3,6 +3,7 @@ import axios from 'axios';
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-import * as bootstrap from 'bootstrap';
+import Dropdown from 'bootstrap/js/dist/dropdown.js';
+import Modal from 'bootstrap/js/dist/modal.js';
 
-window.bootstrap = bootstrap;
+window.bootstrap = { Dropdown, Modal };

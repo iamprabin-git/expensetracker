@@ -30,8 +30,8 @@
         </a>
     </div>
 
-    <nav class="user-sidebar__nav flex-grow-1 px-2 pb-3">
-        <ul class="list-unstyled mb-0">
+    <nav class="user-sidebar__nav flex-1 px-2 pb-3">
+        <ul class="list-none mb-0">
             @foreach ($links as $link)
                 <li>
                     <a

@@ -222,6 +222,7 @@ $app = require_once __DIR__.'/../expensetracker/bootstrap/app.php';
 |-------|-----|
 | 500 error | `storage/logs/laravel.log`, check permissions, run `php artisan config:clear` |
 | CSS/JS missing | See **§10 cPanel**; run `npm run build`, upload `public/build`, delete `public/hot` |
+| CSS/JS load `127.0.0.1:5173` or `[::1]:5173` | Delete **`public/hot`** on server; run `php artisan assets:check --fix` |
 | CSS 404 but HTML works | Wrong `APP_URL` / `ASSET_URL`; wrong document root; missing `public/build` |
 | Desktop OK, mobile layout broken | Rebuild with `npm run build` and redeploy `public/build` (fixes legacy `@media` for older phones) |
 | Images 404 | `php artisan storage:link` |

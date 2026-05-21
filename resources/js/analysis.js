@@ -1,35 +1,39 @@
-import {
-    ArcElement,
-    BarController,
-    BarElement,
-    CategoryScale,
-    Chart,
-    DoughnutController,
-    Filler,
-    Legend,
-    LineController,
-    LineElement,
-    LinearScale,
-    PointElement,
-    Title,
-    Tooltip,
-} from 'chart.js';
+const ROOT_MARGIN = '100px 0px';
+const IO_THRESHOLD = 0.08;
 
-Chart.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    BarController,
-    LineController,
-    DoughnutController,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-);
+let chartApi = null;
+/** @type {Map<string, import('chart.js').Chart>} */
+const chartInstances = new Map();
+/** @type {Set<string>} */
+const renderedCanvasIds = new Set();
+
+async function loadChartJs() {
+    if (chartApi) {
+        return chartApi;
+    }
+
+    const mod = await import('chart.js');
+
+    mod.Chart.register(
+        mod.CategoryScale,
+        mod.LinearScale,
+        mod.PointElement,
+        mod.LineElement,
+        mod.BarElement,
+        mod.ArcElement,
+        mod.BarController,
+        mod.LineController,
+        mod.DoughnutController,
+        mod.Title,
+        mod.Tooltip,
+        mod.Legend,
+        mod.Filler,
+    );
+
+    chartApi = mod;
+
+    return chartApi;
+}
 
 function isDarkMode() {
     return document.documentElement.classList.contains('dark');
@@ -107,171 +111,219 @@ function doughnutOptions() {
     };
 }
 
+function destroyChart(id) {
+    const chart = chartInstances.get(id);
+    if (chart) {
+        chart.destroy();
+        chartInstances.delete(id);
+    }
+}
+
+function renderChart(id, data, Chart) {
+    destroyChart(id);
+
+    const colors = themeColors();
+    const ctx = document.getElementById(id);
+    if (!ctx) {
+        return;
+    }
+
+    let chart;
+
+    switch (id) {
+        case 'chartMonthlyTrend':
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.monthly.labels,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: data.monthly.income,
+                            borderColor: colors.income,
+                            backgroundColor: colors.incomeFill,
+                            fill: true,
+                            tension: 0.35,
+                        },
+                        {
+                            label: 'Expenses',
+                            data: data.monthly.expense,
+                            borderColor: colors.expense,
+                            backgroundColor: colors.expenseFill,
+                            fill: true,
+                            tension: 0.35,
+                        },
+                        {
+                            label: 'Net',
+                            data: data.monthly.net,
+                            borderColor: colors.net,
+                            backgroundColor: colors.netFill,
+                            fill: false,
+                            tension: 0.35,
+                            borderDash: [6, 4],
+                        },
+                    ],
+                },
+                options: baseOptions(),
+            });
+            break;
+        case 'chartMonthlyBars': {
+            const opts = baseOptions();
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.monthly.labels,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: data.monthly.income,
+                            backgroundColor: colors.income,
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Expenses',
+                            data: data.monthly.expense,
+                            backgroundColor: colors.expense,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    ...opts,
+                    scales: {
+                        ...opts.scales,
+                        x: { ...opts.scales.x, stacked: false },
+                        y: { ...opts.scales.y, stacked: false },
+                    },
+                },
+            });
+            break;
+        }
+        case 'chartIncomeExpense':
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.totals.labels,
+                    datasets: [
+                        {
+                            data: data.totals.values,
+                            backgroundColor: [colors.income, colors.expense],
+                            borderWidth: 0,
+                        },
+                    ],
+                },
+                options: doughnutOptions(),
+            });
+            break;
+        case 'chartExpenseCategories':
+            if (!data.expenseByCategory.labels.length) {
+                return;
+            }
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.expenseByCategory.labels,
+                    datasets: [
+                        {
+                            label: 'Expenses',
+                            data: data.expenseByCategory.values,
+                            backgroundColor: data.expenseByCategory.colors,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    ...baseOptions(),
+                    indexAxis: 'y',
+                    plugins: {
+                        ...baseOptions().plugins,
+                        legend: { display: false },
+                    },
+                },
+            });
+            break;
+        case 'chartIncomeCategories':
+            if (!data.incomeByCategory.labels.length) {
+                return;
+            }
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.incomeByCategory.labels,
+                    datasets: [
+                        {
+                            data: data.incomeByCategory.values,
+                            backgroundColor: data.incomeByCategory.colors,
+                            borderWidth: 0,
+                        },
+                    ],
+                },
+                options: doughnutOptions(),
+            });
+            break;
+        default:
+            return;
+    }
+
+    chartInstances.set(id, chart);
+    renderedCanvasIds.add(id);
+}
+
+async function paintChart(id, data) {
+    const { Chart } = await loadChartJs();
+    renderChart(id, data, Chart);
+}
+
+async function repaintRendered(data) {
+    if (!chartApi || renderedCanvasIds.size === 0) {
+        return;
+    }
+
+    const { Chart } = chartApi;
+    for (const id of renderedCanvasIds) {
+        renderChart(id, data, Chart);
+    }
+}
+
 export function initAnalysisCharts(data) {
     const root = document.querySelector('[data-analysis-root]');
     if (!root || !data) {
         return;
     }
 
-    const charts = [];
+    const wraps = root.querySelectorAll('.analysis-chart-wrap');
+    if (!wraps.length) {
+        return;
+    }
 
-    const destroyAll = () => {
-        charts.forEach((chart) => chart.destroy());
-        charts.length = 0;
-    };
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) {
+                    return;
+                }
 
-    const render = () => {
-        destroyAll();
-        const colors = themeColors();
+                const canvas = entry.target.querySelector('canvas');
+                if (!canvas?.id) {
+                    return;
+                }
 
-        const trendCtx = document.getElementById('chartMonthlyTrend');
-        if (trendCtx) {
-            charts.push(
-                new Chart(trendCtx, {
-                    type: 'line',
-                    data: {
-                        labels: data.monthly.labels,
-                        datasets: [
-                            {
-                                label: 'Income',
-                                data: data.monthly.income,
-                                borderColor: colors.income,
-                                backgroundColor: colors.incomeFill,
-                                fill: true,
-                                tension: 0.35,
-                            },
-                            {
-                                label: 'Expenses',
-                                data: data.monthly.expense,
-                                borderColor: colors.expense,
-                                backgroundColor: colors.expenseFill,
-                                fill: true,
-                                tension: 0.35,
-                            },
-                            {
-                                label: 'Net',
-                                data: data.monthly.net,
-                                borderColor: colors.net,
-                                backgroundColor: colors.netFill,
-                                fill: false,
-                                tension: 0.35,
-                                borderDash: [6, 4],
-                            },
-                        ],
-                    },
-                    options: baseOptions(),
-                }),
-            );
+                observer.unobserve(entry.target);
+                paintChart(canvas.id, data);
+            });
+        },
+        { rootMargin: ROOT_MARGIN, threshold: IO_THRESHOLD },
+    );
+
+    wraps.forEach((wrap) => {
+        if (wrap.querySelector('canvas')) {
+            observer.observe(wrap);
         }
-
-        const barCtx = document.getElementById('chartMonthlyBars');
-        if (barCtx) {
-            charts.push(
-                new Chart(barCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.monthly.labels,
-                        datasets: [
-                            {
-                                label: 'Income',
-                                data: data.monthly.income,
-                                backgroundColor: colors.income,
-                                borderRadius: 6,
-                            },
-                            {
-                                label: 'Expenses',
-                                data: data.monthly.expense,
-                                backgroundColor: colors.expense,
-                                borderRadius: 6,
-                            },
-                        ],
-                    },
-                    options: {
-                        ...baseOptions(),
-                        scales: {
-                            ...baseOptions().scales,
-                            x: { ...baseOptions().scales.x, stacked: false },
-                            y: { ...baseOptions().scales.y, stacked: false },
-                        },
-                    },
-                }),
-            );
-        }
-
-        const totalsCtx = document.getElementById('chartIncomeExpense');
-        if (totalsCtx) {
-            charts.push(
-                new Chart(totalsCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.totals.labels,
-                        datasets: [
-                            {
-                                data: data.totals.values,
-                                backgroundColor: [colors.income, colors.expense],
-                                borderWidth: 0,
-                            },
-                        ],
-                    },
-                    options: doughnutOptions(),
-                }),
-            );
-        }
-
-        const expenseCtx = document.getElementById('chartExpenseCategories');
-        if (expenseCtx && data.expenseByCategory.labels.length) {
-            charts.push(
-                new Chart(expenseCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.expenseByCategory.labels,
-                        datasets: [
-                            {
-                                label: 'Expenses',
-                                data: data.expenseByCategory.values,
-                                backgroundColor: data.expenseByCategory.colors,
-                                borderRadius: 6,
-                            },
-                        ],
-                    },
-                    options: {
-                        ...baseOptions(),
-                        indexAxis: 'y',
-                        plugins: {
-                            ...baseOptions().plugins,
-                            legend: { display: false },
-                        },
-                    },
-                }),
-            );
-        }
-
-        const incomeCtx = document.getElementById('chartIncomeCategories');
-        if (incomeCtx && data.incomeByCategory.labels.length) {
-            charts.push(
-                new Chart(incomeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.incomeByCategory.labels,
-                        datasets: [
-                            {
-                                data: data.incomeByCategory.values,
-                                backgroundColor: data.incomeByCategory.colors,
-                                borderWidth: 0,
-                            },
-                        ],
-                    },
-                    options: doughnutOptions(),
-                }),
-            );
-        }
-    };
-
-    render();
+    });
 
     document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
         btn.addEventListener('click', () => {
-            setTimeout(render, 50);
+            setTimeout(() => repaintRendered(data), 50);
         });
     });
 }

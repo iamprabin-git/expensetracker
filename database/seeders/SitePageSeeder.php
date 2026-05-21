@@ -166,6 +166,8 @@ class SitePageSeeder extends Seeder
             'sections' => [
                 [
                     'type' => 'pricing',
+                    'title' => 'Choose the plan that fits you',
+                    'subtitle' => 'Start free and upgrade when you need more power. No hidden fees — cancel anytime.',
                     'items' => [
                         [
                             'title' => 'Free',
@@ -252,6 +254,8 @@ class SitePageSeeder extends Seeder
             'sections' => [
                 [
                     'type' => 'faq',
+                    'title' => 'Common questions',
+                    'subtitle' => 'Everything you need to know about accounts, plans, and security.',
                     'items' => [
                         ['title' => "Is {$app} free?", 'text' => 'Yes. The Free plan includes unlimited personal transactions, categories, and dashboard access. Pro and Business plans add optional upgrades.'],
                         ['title' => 'How do I access the admin panel?', 'text' => 'Admin users log in with an admin account and are redirected to /admin, powered by Filament. Regular users use the standard dashboard.'],
@@ -279,8 +283,11 @@ class SitePageSeeder extends Seeder
             'hero_image' => null,
             'body_html' => null,
             'extras' => [
+                'section_title' => 'Get in touch',
+                'section_subtitle' => 'Reach our team for support, billing, or partnership questions. We read every message.',
                 'sidebar_title' => 'Get in touch',
                 'form_title' => 'Send a message',
+                'form_subtitle' => 'All fields are required. We typically reply within two business days.',
                 'success_message' => 'Message received! Our team will review it and reply to your email soon.',
             ],
             'sections' => [

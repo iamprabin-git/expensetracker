@@ -68,8 +68,9 @@ export function initUserSidebar() {
             const target = event.target;
             const inSidebar = sidebar.contains(target);
             const onToggle = Array.from(toggles).some((btn) => btn.contains(target));
+            const onThemeToggle = target.closest('[data-theme-toggle]');
 
-            if (!inSidebar && !onToggle) {
+            if (!inSidebar && !onToggle && !onThemeToggle) {
                 close();
             }
         },

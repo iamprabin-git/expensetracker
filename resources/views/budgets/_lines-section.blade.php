@@ -3,19 +3,19 @@
 @endphp
 
 <div class="card-panel mb-4">
-    <h3 class="h6 fw-semibold mb-3">{{ $title }}</h3>
+    <h3 class="h6 font-semibold mb-3">{{ $title }}</h3>
 
     @if ($lines->isEmpty() && $unbudgeted->isEmpty())
-        <p class="text-secondary small mb-0">{{ $emptyHint }}</p>
+        <p class="text-muted-foreground small mb-0">{{ $emptyHint }}</p>
     @else
-        <div class="table-responsive table-scroll-touch">
-            <table class="table table-hover align-middle mb-0 table-mobile-stack">
+        <div class="overflow-x-auto table-scroll-touch">
+            <table class="w-full align-middle mb-0 table-mobile-stack">
                 <thead>
                     <tr>
                         <th>Category</th>
-                        <th class="text-end">Budget</th>
-                        <th class="text-end">Actual</th>
-                        <th class="text-end">Remaining</th>
+                        <th class="text-right">Budget</th>
+                        <th class="text-right">Actual</th>
+                        <th class="text-right">Remaining</th>
                         <th style="min-width: 8rem">Progress</th>
                         <th></th>
                     </tr>
@@ -28,17 +28,17 @@
                                 {{ $line['category']->name }}
                                 <span class="badge {{ $line['category']->type->badgeClass() }} ms-1">{{ $line['category']->type->label() }}</span>
                             </td>
-                            <td class="text-end" data-label="Budget">
-                                <form method="POST" action="{{ route('budgets.items.update', $line['item']) }}" class="d-inline-flex gap-1 justify-content-end align-items-center budget-inline-form">
+                            <td class="text-right" data-label="Budget">
+                                <form method="POST" action="{{ route('budgets.items.update', $line['item']) }}" class="inline-flex gap-1 justify-content-end items-center budget-inline-form">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="month" value="{{ $monthKey }}">
-                                    <input type="number" step="0.01" min="0.01" name="amount" value="{{ $line['budget'] }}" class="form-control form-control-sm text-end" style="max-width:7rem">
+                                    <input type="number" step="0.01" min="0.01" name="amount" value="{{ $line['budget'] }}" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs-sm text-right" style="max-width:7rem">
                                     <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
                                 </form>
                             </td>
-                            <td class="text-end fw-semibold text-{{ $variant }}" data-label="Actual">{{ $user->formatMoney($line['actual']) }}</td>
-                            <td class="text-end {{ $line['remaining'] < 0 ? 'text-danger' : '' }}" data-label="Remaining">
+                            <td class="text-right font-semibold text-{{ $variant }}" data-label="Actual">{{ $user->formatMoney($line['actual']) }}</td>
+                            <td class="text-right {{ $line['remaining'] < 0 ? 'text-destructive' : '' }}" data-label="Remaining">
                                 {{ $user->formatMoney($line['remaining']) }}
                             </td>
                             <td data-label="Progress">
@@ -48,13 +48,13 @@
                                     'variant' => $variant,
                                     'hideLabel' => true,
                                 ])
-                                <span class="small text-secondary">{{ round($line['percent'], 1) }}%</span>
+                                <span class="text-sm text-muted-foreground">{{ round($line['percent'], 1) }}%</span>
                             </td>
-                            <td class="text-end" data-label="">
+                            <td class="text-right" data-label="">
                                 <form method="POST" action="{{ route('budgets.items.destroy', $line['item']) }}" onsubmit="return confirm('Remove this budget line?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    <x-ui.button type="submit" variant="destructive" size="sm">Remove</x-ui.button>
                                 </form>
                             </td>
                         </tr>
@@ -65,12 +65,12 @@
 
         @if ($unbudgeted->isNotEmpty())
             <div class="mt-4 pt-3 border-top">
-                <p class="small fw-semibold mb-2">Spending without a budget line</p>
-                <ul class="list-unstyled small mb-0">
+                <p class="text-sm font-semibold mb-2">Spending without a budget line</p>
+                <ul class="list-none small mb-0">
                     @foreach ($unbudgeted as $row)
-                        <li class="d-flex justify-content-between py-1">
+                        <li class="flex justify-between py-1">
                             <span>{{ $row['category']->name }}</span>
-                            <span class="text-{{ $variant }} fw-semibold">{{ $user->formatMoney($row['actual']) }}</span>
+                            <span class="text-{{ $variant }} font-semibold">{{ $user->formatMoney($row['actual']) }}</span>
                         </li>
                     @endforeach
                 </ul>

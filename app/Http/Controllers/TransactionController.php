@@ -5,32 +5,46 @@ namespace App\Http\Controllers;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\TransactionListExportService;
+use App\Support\TabularExporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Transaction::query()
-            ->where('user_id', $request->user()->id)
+        $userId = $request->user()->id;
+        $search = $request->string('search')->toString();
+        $type = $request->string('type')->toString();
+
+        $filtered = Transaction::query()
+            ->where('user_id', $userId)
+            ->when($type !== '', fn ($q) => $q->where('type', $type))
+            ->when($search !== '', fn ($q) => $q->where('title', 'like', "%{$search}%"));
+
+        $summary = [
+            'count' => (clone $filtered)->count(),
+            'income' => (float) (clone $filtered)->where('type', TransactionType::Income)->sum('amount'),
+            'expense' => (float) (clone $filtered)->where('type', TransactionType::Expense)->sum('amount'),
+        ];
+        $summary['balance'] = $summary['income'] - $summary['expense'];
+
+        $transactions = (clone $filtered)
             ->with('category')
             ->latest('transaction_date')
-            ->latest('id');
+            ->latest('id')
+            ->paginate(12)
+            ->withQueryString();
 
-        if ($type = $request->string('type')->toString()) {
-            $query->where('type', $type);
-        }
-
-        if ($search = $request->string('search')->toString()) {
-            $query->where('title', 'like', "%{$search}%");
-        }
-
-        $transactions = $query->paginate(12)->withQueryString();
-
-        return view('transactions.index', compact('transactions'));
+        return view('transactions.index', [
+            'transactions' => $transactions,
+            'summary' => $summary,
+            'hasFilters' => $search !== '' || $type !== '',
+        ]);
     }
 
     public function create(Request $request): View
@@ -100,6 +114,23 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return redirect()->route('transactions.index')->with('success', 'Transaction deleted.');
+    }
+
+    public function export(Request $request, string $format): StreamedResponse
+    {
+        abort_unless(in_array($format, ['csv', 'xlsx'], true), 404);
+
+        $service = new TransactionListExportService;
+        $filters = $request->only(['search', 'type']);
+        $transactions = $service->transactions($request->user(), $filters);
+        $dataset = $service->dataset($request->user(), $transactions);
+        $extension = $format === 'xlsx' ? 'xlsx' : 'csv';
+        $filename = $service->filename($extension);
+
+        return match ($format) {
+            'csv' => TabularExporter::downloadCsv($filename, $dataset['headers'], $dataset['rows']),
+            'xlsx' => TabularExporter::downloadXlsx($filename, $dataset['headers'], $dataset['rows']),
+        };
     }
 
     protected function authorizeTransaction(Request $request, Transaction $transaction): void

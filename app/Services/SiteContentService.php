@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\SitePage;
+use Database\Seeders\SitePageSeeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,6 +16,8 @@ class SiteContentService
 
     public function get(string $slug): SitePage
     {
+        $this->ensureSystemPagesExist();
+
         $pages = $this->all();
 
         $page = $pages->get($slug);
@@ -63,6 +66,17 @@ class SiteContentService
     {
         Cache::forget(self::CACHE_KEY);
         $this->pages = null;
+    }
+
+    /** Seed marketing pages when the database is empty (avoids 404 on /). */
+    public function ensureSystemPagesExist(): void
+    {
+        if (SitePage::query()->exists()) {
+            return;
+        }
+
+        (new SitePageSeeder)->run();
+        $this->flush();
     }
 
     /**

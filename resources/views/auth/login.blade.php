@@ -1,9 +1,6 @@
 <x-guest-layout>
-    <h1 class="h4 fw-bold mb-2">Log in</h1>
-    <p class="small text-secondary mb-4">Use Google or your email and password. New accounts need admin approval before the dashboard is available.</p>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <h1 class="text-xl font-semibold tracking-tight mb-2">Log in</h1>
+    <p class="text-sm text-muted-foreground mb-4">Use Google or your email and password. New accounts need admin approval before the dashboard is available.</p>
 
     @include('auth.partials.google-button')
 
@@ -37,9 +34,9 @@
             </label>
         </div>
 
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
             @if (Route::has('password.request'))
-                <a class="small text-decoration-none" href="{{ route('password.request') }}">
+                <a class="text-sm text-primary hover:underline" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
@@ -50,8 +47,8 @@
         </div>
     </form>
 
-    <p class="small text-secondary mt-3 mb-0">
-        Admin login? <a href="{{ url('/admin/login') }}" class="text-decoration-none">Open admin panel</a>
-        · <a href="{{ url('/admin/password-reset/request') }}" class="text-decoration-none">Forgot admin password</a>
+    <p class="text-sm text-muted-foreground mt-3 mb-0">
+        Admin login? <a href="{{ url('/admin/login') }}" class="no-underline">Open admin panel</a>
+        · <a href="{{ url('/admin/password-reset/request') }}" class="no-underline">Forgot admin password</a>
     </p>
 </x-guest-layout>

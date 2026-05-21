@@ -8,7 +8,7 @@
     <div class="site-header__backdrop" data-site-header-backdrop aria-hidden="true"></div>
 
     <nav class="site-header__nav" aria-label="Main navigation">
-        <div class="container">
+        <div class="mx-auto w-full max-w-6xl px-4">
             {{-- Top bar --}}
             <div class="site-header__inner">
                 <a class="site-brand" href="{{ $brandUrl }}">
@@ -23,7 +23,7 @@
                 </a>
 
                 {{-- Desktop nav --}}
-                <ul class="site-header__menu site-header__menu--desktop d-none d-lg-flex">
+                <ul class="site-header__menu site-header__menu--desktop hidden lg:flex">
                     @if ($variant === 'app')
                         @include('layouts.partials.site-header-nav-links', ['context' => 'app'])
                     @else
@@ -34,7 +34,7 @@
                 <div class="site-header__actions">
                     @include('components.theme-toggle')
 
-                    <div class="site-header__auth d-none d-lg-flex align-items-center gap-2">
+                    <div class="site-header__auth hidden lg:flex items-center gap-2">
                         @auth
                             @include('layouts.partials.site-header-user-menu')
                         @else
@@ -44,7 +44,7 @@
 
                     <button
                         type="button"
-                        class="site-header__toggle d-lg-none"
+                        class="site-header__toggle lg:hidden"
                         data-site-header-toggle
                         aria-controls="{{ $navbarId }}"
                         aria-expanded="false"
@@ -61,7 +61,7 @@
 
             {{-- Mobile drawer --}}
             <div
-                class="site-header__mobile d-lg-none"
+                class="site-header__mobile lg:hidden"
                 id="{{ $navbarId }}"
                 data-site-header-panel
                 aria-hidden="true"
@@ -75,7 +75,7 @@
                         @endif
                     </ul>
 
-                    <div class="site-header__mobile-auth d-lg-none">
+                    <div class="site-header__mobile-auth lg:hidden">
                         @auth
                             @include('layouts.partials.site-header-user-menu', ['mobile' => true])
                         @else

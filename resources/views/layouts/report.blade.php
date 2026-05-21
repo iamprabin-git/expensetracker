@@ -8,19 +8,26 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
     <style>
         @media print {
-            .report-no-print { display: none !important; }
+            .report-no-print,
+            .report-toolbar { display: none !important; }
             body { background: #fff !important; color: #000 !important; }
             .report-page { box-shadow: none !important; border: none !important; margin: 0 !important; }
         }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 antialiased">
-    <div class="report-toolbar report-no-print border-bottom bg-white dark:bg-slate-900 sticky-top">
-        <div class="container-fluid px-3 px-sm-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <a href="{{ route('reports.index') }}" class="btn btn-sm btn-outline-secondary">&larr; All reports</a>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
+<body class="bg-background font-sans text-foreground antialiased">
+    @include('layouts.partials.flash-toasts')
+    <div class="report-toolbar report-no-print sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
+        <div class="w-full max-w-6xl mx-auto px-3 sm:px-4 pt-3">
+            @include('layouts.partials.breadcrumbs')
+        </div>
+        <div class="w-full max-w-6xl mx-auto px-3 sm:px-4 pb-3 flex flex-wrap items-center justify-between gap-3">
+            <x-ui.button variant="outline" size="sm" href="{{ route('reports.index') }}">&larr; All reports</x-ui.button>
+            <div class="flex flex-wrap gap-2 items-center">
+                @include('components.theme-toggle')
                 @isset($reportKey)
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -35,13 +42,21 @@
                         </ul>
                     </div>
                 @endisset
-                <button type="button" class="btn btn-sm btn-primary" onclick="window.print()">Print</button>
-                <a href="{{ route('reports.pdf', ['report' => $reportKey ?? 'trial-balance'] + request()->query()) }}" class="btn btn-sm btn-outline-primary">Download PDF</a>
+                <x-ui.button size="sm" type="button" onclick="window.print()">Print statement</x-ui.button>
+                @php
+                    $exportParams = ['report' => $reportKey ?? 'trial-balance'] + request()->query();
+                @endphp
+                <x-export-dropdown
+                    label="Download"
+                    :pdf-href="route('reports.pdf', $exportParams)"
+                    :csv-href="route('reports.export', $exportParams + ['format' => 'csv'])"
+                    :xlsx-href="route('reports.export', $exportParams + ['format' => 'xlsx'])"
+                />
             </div>
         </div>
     </div>
 
-    <main class="container-fluid px-3 px-sm-4 py-4 py-md-5 report-main">
+    <main class="w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 md:py-5 report-main">
         @yield('content')
     </main>
 </body>

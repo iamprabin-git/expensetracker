@@ -7,43 +7,43 @@
     @include('reports.partials.header')
 
     <div class="report-page report-page-wrap card-panel bg-white mx-auto">
-        <p class="small text-secondary mb-3">As of {{ $report['as_of'] }} · Based on cumulative transactions.</p>
-        <div class="row g-4">
-            <div class="col-12 col-md-6">
-                <h2 class="h6 fw-semibold">Assets</h2>
-                <div class="table-responsive table-scroll-touch">
+        <p class="text-sm text-muted-foreground mb-3">As of {{ $report['as_of'] }} · Based on cumulative transactions.</p>
+        <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-12 md:col-span-6">
+                <h2 class="h6 font-semibold">Assets</h2>
+                <div class="overflow-x-auto table-scroll-touch">
                     <table class="table table-sm table-key-value mb-0">
                         @foreach ($report['assets'] as $row)
-                            <tr><td>{{ $row['name'] }}</td><td class="text-end">{{ $user->formatMoney($row['amount']) }}</td></tr>
+                            <tr><td>{{ $row['name'] }}</td><td class="text-right">{{ $user->formatMoney($row['amount']) }}</td></tr>
                         @endforeach
-                        <tr class="fw-bold border-top"><td>Total assets</td><td class="text-end">{{ $user->formatMoney($report['total_assets']) }}</td></tr>
+                        <tr class="font-bold border-top"><td>Total assets</td><td class="text-right">{{ $user->formatMoney($report['total_assets']) }}</td></tr>
                     </table>
                 </div>
             </div>
-            <div class="col-12 col-md-6">
-                <h2 class="h6 fw-semibold">Liabilities</h2>
-                <div class="table-responsive table-scroll-touch mb-3">
+            <div class="col-span-12 md:col-span-6">
+                <h2 class="h6 font-semibold">Liabilities</h2>
+                <div class="overflow-x-auto table-scroll-touch mb-3">
                     <table class="table table-sm table-key-value mb-0">
                         @foreach ($report['liabilities'] as $row)
-                            <tr><td>{{ $row['name'] }}</td><td class="text-end">{{ $user->formatMoney($row['amount']) }}</td></tr>
+                            <tr><td>{{ $row['name'] }}</td><td class="text-right">{{ $user->formatMoney($row['amount']) }}</td></tr>
                         @endforeach
-                        <tr class="fw-bold border-top"><td>Total liabilities</td><td class="text-end">{{ $user->formatMoney($report['total_liabilities']) }}</td></tr>
+                        <tr class="font-bold border-top"><td>Total liabilities</td><td class="text-right">{{ $user->formatMoney($report['total_liabilities']) }}</td></tr>
                     </table>
                 </div>
-                <h2 class="h6 fw-semibold">Equity</h2>
-                <div class="table-responsive table-scroll-touch">
+                <h2 class="h6 font-semibold">Equity</h2>
+                <div class="overflow-x-auto table-scroll-touch">
                     <table class="table table-sm table-key-value mb-0">
                         @foreach ($report['equity'] as $row)
-                            <tr><td>{{ $row['name'] }}</td><td class="text-end">{{ $user->formatMoney($row['amount']) }}</td></tr>
+                            <tr><td>{{ $row['name'] }}</td><td class="text-right">{{ $user->formatMoney($row['amount']) }}</td></tr>
                         @endforeach
-                        <tr class="fw-bold border-top"><td>Total equity</td><td class="text-end">{{ $user->formatMoney($report['total_equity']) }}</td></tr>
+                        <tr class="font-bold border-top"><td>Total equity</td><td class="text-right">{{ $user->formatMoney($report['total_equity']) }}</td></tr>
                     </table>
                 </div>
-                <p class="fw-bold mt-3 mb-0">Liabilities + Equity: {{ $user->formatMoney($report['total_liabilities_equity']) }}</p>
+                <p class="font-bold mt-3 mb-0">Liabilities + Equity: {{ $user->formatMoney($report['total_liabilities_equity']) }}</p>
             </div>
         </div>
         @if ($report['balanced'])
-            <p class="small text-success mb-0">✓ Assets = Liabilities + Equity</p>
+            <p class="text-sm text-success mb-0">✓ Assets = Liabilities + Equity</p>
         @endif
     </div>
 @endsection

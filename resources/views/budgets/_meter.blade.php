@@ -8,5 +8,5 @@
     <div class="budget-meter__bar" style="width: {{ $barPercent }}%"></div>
 </div>
 @if (!($hideLabel ?? false))
-    <p class="small text-secondary mb-0 mt-1">{{ round($rawPercent, 1) }}% of budget</p>
+    <p class="text-sm text-muted-foreground mb-0 mt-1">{{ round($rawPercent, 1) }}% of budget</p>
 @endif

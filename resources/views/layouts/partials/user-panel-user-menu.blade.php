@@ -14,11 +14,11 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 site-header__dropdown">
         <li class="site-header__dropdown-user px-3 py-3 border-bottom">
-            <div class="d-flex align-items-center gap-3">
+            <div class="flex items-center gap-3">
                 <x-user-avatar :user="$user" size="md" />
                 <div class="min-w-0">
-                    <p class="fw-semibold mb-0 text-truncate text-slate-900 dark:text-white">{{ $user->name }}</p>
-                    <p class="small text-secondary mb-0 text-truncate">{{ $user->email }}</p>
+                    <p class="font-semibold mb-0 text-truncate text-slate-900 dark:text-white">{{ $user->name }}</p>
+                    <p class="text-sm text-muted-foreground mb-0 text-truncate">{{ $user->email }}</p>
                 </div>
             </div>
         </li>
@@ -27,7 +27,7 @@
         <li>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="dropdown-item text-danger">Log out</button>
+                <button type="submit" class="dropdown-item text-destructive">Log out</button>
             </form>
         </li>
     </ul>

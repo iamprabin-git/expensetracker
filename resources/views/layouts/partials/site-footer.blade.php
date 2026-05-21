@@ -1,9 +1,9 @@
 <footer class="site-footer">
     <div class="site-footer__top">
-        <div class="container">
-            <div class="row g-4 g-xl-5 align-items-start">
+        <div class="mx-auto w-full max-w-6xl px-4">
+            <div class="grid grid-cols-12 gap-4 g-xl-5 align-items-start">
                 {{-- Brand column --}}
-                <div class="col-12 col-lg-4">
+                <div class="col-span-12 lg:col-span-4">
                     <a href="{{ route('home') }}" class="site-brand site-brand--footer">
                         @unless ($company?->logoUrl())
                             <span class="site-brand__icon" aria-hidden="true">
@@ -25,7 +25,7 @@
                 </div>
 
                 {{-- Desktop link columns --}}
-                <div class="col-6 col-md-4 col-lg-2 d-none d-md-block">
+                <div class="col-span-6 md:col-span-4 col-lg-2 hidden md:block">
                     <h3 class="site-footer__title">Product</h3>
                     <ul class="site-footer__links">
                         <li><a href="{{ route('features') }}">Features</a></li>
@@ -34,7 +34,7 @@
                         <li><a href="{{ route('register') }}">Get started</a></li>
                     </ul>
                 </div>
-                <div class="col-6 col-md-4 col-lg-2 d-none d-md-block">
+                <div class="col-span-6 md:col-span-4 col-lg-2 hidden md:block">
                     <h3 class="site-footer__title">Company</h3>
                     <ul class="site-footer__links">
                         <li><a href="{{ route('about') }}">About</a></li>
@@ -42,7 +42,7 @@
                         <li><a href="{{ route('filament.admin.auth.login') }}">Admin login</a></li>
                     </ul>
                 </div>
-                <div class="col-12 col-md-4 col-lg-2 d-none d-md-block">
+                <div class="col-span-12 md:col-span-4 col-lg-2 hidden md:block">
                     <h3 class="site-footer__title">Legal</h3>
                     <ul class="site-footer__links">
                         <li><a href="{{ route('privacy') }}">Privacy</a></li>
@@ -51,18 +51,18 @@
                 </div>
 
                 {{-- Newsletter --}}
-                <div class="col-12 col-lg-4">
+                <div class="col-span-12 lg:col-span-4">
                     <h3 class="site-footer__title">{{ $company?->newsletter_title ?? 'Stay updated' }}</h3>
                     <p class="site-footer__text mb-3">{{ $company?->newsletter_text ?? '' }}</p>
                     <form class="site-footer__newsletter" onsubmit="return false;">
-                        <input type="email" class="site-footer__input form-control" placeholder="Email address" aria-label="Email">
+                        <input type="email" class="site-footer__input flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs" placeholder="Email address" aria-label="Email">
                         <button type="button" class="btn site-footer__submit">Subscribe</button>
                     </form>
                 </div>
             </div>
 
             {{-- Mobile accordion (custom — no Bootstrap collapse) --}}
-            <div class="site-footer__accordion d-md-none mt-2" data-site-footer-accordion>
+            <div class="site-footer__accordion md:hidden mt-2" data-site-footer-accordion>
                 <div class="site-footer__accordion-item" data-site-footer-item>
                     <button
                         class="site-footer__accordion-btn collapsed"
@@ -116,7 +116,7 @@
     </div>
 
     <div class="site-footer__bottom">
-        <div class="container">
+        <div class="mx-auto w-full max-w-6xl px-4">
             <div class="site-footer__bottom-inner">
                 <p class="site-footer__copy mb-0">&copy; {{ date('Y') }} {{ $company?->copyright_text ?? $company?->company_name ?? config('app.name') }}. All rights reserved.</p>
                 <div class="site-footer__bottom-links">

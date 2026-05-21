@@ -2,17 +2,17 @@
 
 use App\Http\Controllers\AccountStatusController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ReceiptScanController;
+use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\ReminderController;
-use App\Http\Controllers\ReceiptScanController;
-use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +54,9 @@ Route::middleware(['auth', 'verified', 'user.panel', 'user.approved', 'membershi
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+    Route::get('/reports/{report}/export/{format}', [ReportController::class, 'export'])
+        ->where('format', 'csv|xlsx')
+        ->name('reports.export');
     Route::get('/transactions/statement', function (Request $request) {
         return redirect()->route('reports.show', array_merge(
             ['report' => 'transaction-statement'],
@@ -66,6 +69,15 @@ Route::middleware(['auth', 'verified', 'user.panel', 'user.approved', 'membershi
             $request->query()
         ));
     })->name('transactions.statement.pdf');
+    Route::get('/transactions/statement/export/{format}', function (Request $request, string $format) {
+        return redirect()->route('reports.export', array_merge(
+            ['report' => 'transaction-statement', 'format' => $format],
+            $request->query()
+        ));
+    })->where('format', 'csv|xlsx')->name('transactions.statement.export');
+    Route::get('/transactions/export/{format}', [TransactionController::class, 'export'])
+        ->where('format', 'csv|xlsx')
+        ->name('transactions.export');
     Route::middleware('ai.scan')->group(function () {
         Route::get('ai-scan', [ReceiptScanController::class, 'index'])->name('ai-scan.index');
         Route::post('ai-scan/analyze', [ReceiptScanController::class, 'analyze'])

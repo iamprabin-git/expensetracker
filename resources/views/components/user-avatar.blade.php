@@ -13,11 +13,13 @@
     };
 @endphp
 
-@if ($user?->avatarUrl())
+@if ($user?->profilePhotoUrl())
     <img
-        src="{{ $user->avatarUrl() }}"
+        src="{{ $user->profilePhotoUrl() }}"
         alt="{{ $user->name }}"
         {{ $attributes->class(['user-avatar', 'user-avatar--img', $sizeClass]) }}
+        loading="lazy"
+        referrerpolicy="no-referrer"
     >
 @else
     <span {{ $attributes->class(['user-avatar', $sizeClass]) }} aria-hidden="true">{{ $user?->initials() }}</span>

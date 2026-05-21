@@ -1,3 +1,3 @@
-<p class="small text-secondary mt-4 mb-0">
-    <a href="{{ route('login') }}" class="text-decoration-none">&larr; Back to login</a>
+<p class="text-sm text-muted-foreground mt-4 mb-0">
+    <a href="{{ route('login') }}" class="no-underline">&larr; Back to login</a>
 </p>

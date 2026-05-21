@@ -1,3 +1,5 @@
+import { showToast } from './toast';
+
 /**
  * AI Scan — receipt image upload, preview, analyze, save with receipt attachment.
  */
@@ -75,26 +77,15 @@ export function initAiScan() {
     }
 
     function showError(message) {
-        if (!els.errorBox) {
-            return;
-        }
-        els.errorBox.textContent = message;
-        els.errorBox.classList.remove('d-none');
-        els.successBox?.classList.add('d-none');
+        showToast(message, 'error', { duration: 6000 });
     }
 
     function showSuccess(message) {
-        if (!els.successBox) {
-            return;
-        }
-        els.successBox.textContent = message;
-        els.successBox.classList.remove('d-none');
-        els.errorBox?.classList.add('d-none');
+        showToast(message, 'success');
     }
 
     function clearMessages() {
-        els.errorBox?.classList.add('d-none');
-        els.successBox?.classList.add('d-none');
+        /* Toasts auto-dismiss; nothing to clear in the DOM. */
     }
 
     function isMobileDevice() {
