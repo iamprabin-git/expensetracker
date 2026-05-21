@@ -148,12 +148,82 @@ location ~ \.php$ {
 - Database: daily automated dump
 - Files: `storage/app` (avatars, receipts, company uploads)
 
-## 10. Troubleshooting
+## 10. cPanel (shared hosting)
+
+This app uses **Vite** for CSS/JS. Production pages load files from `public/build/` (not from `resources/css/`).
+
+### Recommended layout
+
+1. Upload the **whole project** to e.g. `/home/username/expensetracker` (outside `public_html`).
+2. In cPanel → **Domains** → your domain → set **Document Root** to:
+   `expensetracker/public`
+3. Do **not** point the domain at the project root unless you also upload the root `.htaccess` (included in this repo) that forwards requests to `public/`.
+
+### Build assets before upload
+
+On your PC (or in CI), from the project root:
+
+```bash
+npm ci
+npm run build
+```
+
+Then upload **`public/build/`** to the server (entire folder, including `manifest.json` and `assets/`).
+
+This repo tracks `public/build` in git so a normal `git pull` deploy includes CSS/JS. After you change styles or JS, run `npm run build` again and redeploy `public/build`.
+
+### cPanel checklist (CSS not loading)
+
+| Step | What to do |
+|------|------------|
+| 1 | Confirm `public/build/manifest.json` exists on the server |
+| 2 | Confirm `public/build/assets/*.css` exists (same hashes as in `manifest.json`) |
+| 3 | Delete **`public/hot`** if it exists (leftover from `npm run dev` — breaks production) |
+| 4 | Document root must be **`public/`**, not the Laravel root |
+| 5 | Set `APP_URL=https://your-actual-domain.com` (HTTPS, no trailing slash) |
+| 6 | Subfolder install: also set `ASSET_URL="${APP_URL}"` in `.env`, then `php artisan config:cache` |
+| 7 | Run `php artisan config:cache` after changing `.env` |
+
+### Test asset URLs
+
+In the browser, open DevTools → Network. Reload the home page. You should see requests like:
+
+`https://your-domain.com/build/assets/app-….css` → status **200**
+
+If you see **404** on `/build/...`, the folder was not uploaded or the web server is not serving `public/` correctly.
+
+### If you cannot run Node on the server
+
+Build locally, then upload only:
+
+- `public/build/manifest.json`
+- `public/build/assets/` (all files inside)
+
+No `npm` is required on cPanel if you deploy those files.
+
+### Alternative: Laravel app above `public_html`
+
+If your host only allows `public_html` as the web root:
+
+1. Put the Laravel project in `/home/username/expensetracker`.
+2. Copy **contents** of `expensetracker/public/` into `public_html/` (including `build/`, `.htaccess`, `index.php`).
+3. Edit `public_html/index.php` so paths point to the app folder:
+
+```php
+require __DIR__.'/../expensetracker/vendor/autoload.php';
+$app = require_once __DIR__.'/../expensetracker/bootstrap/app.php';
+```
+
+(Adjust `../expensetracker` to match your folder name.)
+
+## 11. Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
 | 500 error | `storage/logs/laravel.log`, check permissions, run `php artisan config:clear` |
-| CSS/JS missing | Run `npm run build`, ensure `public/build` exists |
+| CSS/JS missing | See **§10 cPanel**; run `npm run build`, upload `public/build`, delete `public/hot` |
+| CSS 404 but HTML works | Wrong `APP_URL` / `ASSET_URL`; wrong document root; missing `public/build` |
+| Desktop OK, mobile layout broken | Rebuild with `npm run build` and redeploy `public/build` (fixes legacy `@media` for older phones) |
 | Images 404 | `php artisan storage:link` |
 | Session issues behind proxy | Set trusted proxies; `APP_URL` must match HTTPS domain |
 | AI Scan disabled | Set `GEMINI_API_KEY` or `OPENAI_API_KEY`, `php artisan config:clear` |

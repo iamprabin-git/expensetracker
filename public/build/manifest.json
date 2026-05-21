@@ -1,0 +1,23 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-CmlTmxhO.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/analysis.js": {
+    "file": "assets/analysis-0Qc_RljW.js",
+    "name": "analysis",
+    "src": "resources/js/analysis.js",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BrzYdxHY.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
