@@ -129,8 +129,8 @@ export function initAiScan() {
             return;
         }
         els.scanBtn.disabled = loading || !selectedFile || !config.aiEnabled;
-        els.btnLabel?.classList.toggle('d-none', loading);
-        els.btnLoading?.classList.toggle('d-none', !loading);
+        els.btnLabel?.classList.toggle('hidden', loading);
+        els.btnLoading?.classList.toggle('hidden', !loading);
         els.scanBtn?.setAttribute('aria-busy', loading ? 'true' : 'false');
     }
 
@@ -169,14 +169,14 @@ export function initAiScan() {
     }
 
     function updateUiHasFile(hasFile) {
-        els.placeholder?.classList.toggle('d-none', hasFile);
-        els.previewWrap?.classList.toggle('d-none', !hasFile);
+        els.placeholder?.classList.toggle('hidden', hasFile);
+        els.previewWrap?.classList.toggle('hidden', !hasFile);
         if (els.previewWrap) {
             els.previewWrap.setAttribute('aria-hidden', hasFile ? 'false' : 'true');
         }
-        els.fileMeta?.classList.toggle('d-none', !hasFile);
-        els.uploadActions?.classList.toggle('d-none', hasFile);
-        els.previewActions?.classList.toggle('d-none', !hasFile);
+        els.fileMeta?.classList.toggle('hidden', !hasFile);
+        els.uploadActions?.classList.toggle('hidden', hasFile);
+        els.previewActions?.classList.toggle('hidden', !hasFile);
         els.dropzone?.classList.toggle('ai-scan-dropzone--has-file', hasFile);
 
         if (els.scanBtn) {
@@ -185,7 +185,7 @@ export function initAiScan() {
 
         if (!hasFile) {
             hasScanned = false;
-            els.scannedBadge?.classList.add('d-none');
+            els.scannedBadge?.classList.add('hidden');
         }
 
         updateSaveButtonState();
@@ -299,10 +299,10 @@ export function initAiScan() {
         }
         if (message) {
             els.cameraModalError.textContent = message;
-            els.cameraModalError.classList.remove('d-none');
+            els.cameraModalError.classList.remove('hidden');
         } else {
             els.cameraModalError.textContent = '';
-            els.cameraModalError.classList.add('d-none');
+            els.cameraModalError.classList.add('hidden');
         }
     }
 
@@ -493,7 +493,7 @@ export function initAiScan() {
             }
 
             hasScanned = true;
-            els.scannedBadge?.classList.remove('d-none');
+            els.scannedBadge?.classList.remove('hidden');
             updateSaveButtonState();
 
             showSuccess('Scan complete. Review the fields and save your transaction.');

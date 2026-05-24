@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Support\CategoryIcons;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -15,6 +15,11 @@ class CategoriesTable
     {
         return $table
             ->columns([
+                TextColumn::make('icon')
+                    ->label('Icon')
+                    ->formatStateUsing(fn (?string $state) => CategoryIcons::label($state))
+                    ->badge()
+                    ->color('gray'),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -22,10 +27,6 @@ class CategoriesTable
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state?->label() ?? $state)
                     ->color(fn ($state) => $state?->filamentColor() ?? 'gray'),
-                ColorColumn::make('color'),
-                TextColumn::make('user.name')
-                    ->label('Owner')
-                    ->placeholder('Global'),
                 TextColumn::make('transactions_count')
                     ->counts('transactions')
                     ->label('Uses'),

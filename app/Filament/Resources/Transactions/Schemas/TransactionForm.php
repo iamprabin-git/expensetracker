@@ -36,7 +36,7 @@ class TransactionForm
                     ->minValue(0.01),
                 Select::make('category_id')
                     ->label('Category')
-                    ->options(fn () => Category::query()->orderBy('name')->pluck('name', 'id'))
+                    ->options(fn () => Category::query()->system()->orderBy('name')->pluck('name', 'id'))
                     ->searchable()
                     ->nullable(),
                 DatePicker::make('transaction_date')

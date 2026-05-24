@@ -78,6 +78,10 @@ Route::middleware(['auth', 'verified', 'user.panel', 'user.approved', 'membershi
     Route::get('/transactions/export/{format}', [TransactionController::class, 'export'])
         ->where('format', 'csv|xlsx')
         ->name('transactions.export');
+    Route::get('/transactions/import/template', [TransactionController::class, 'importTemplate'])
+        ->name('transactions.import.template');
+    Route::post('/transactions/import', [TransactionController::class, 'import'])
+        ->name('transactions.import');
     Route::middleware('ai.scan')->group(function () {
         Route::get('ai-scan', [ReceiptScanController::class, 'index'])->name('ai-scan.index');
         Route::post('ai-scan/analyze', [ReceiptScanController::class, 'analyze'])

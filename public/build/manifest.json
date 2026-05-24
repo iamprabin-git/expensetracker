@@ -1,6 +1,6 @@
 {
-  "_toast-0kjgXVk2.js": {
-    "file": "assets/toast-0kjgXVk2.js",
+  "_toast-Ok-mfbLd.js": {
+    "file": "assets/toast-Ok-mfbLd.js",
     "name": "toast",
     "css": [
       "assets/toast-stDfeQAy.css"
@@ -11,19 +11,10 @@
     "src": "_toast-stDfeQAy.css"
   },
   "node_modules/chart.js/dist/chart.js": {
-    "file": "assets/chart-DKKy28UZ.js",
+    "file": "assets/chart-CkRkG1JW.js",
     "name": "chart",
     "src": "node_modules/chart.js/dist/chart.js",
     "isDynamicEntry": true
-  },
-  "resources/css/ai-scan.css": {
-    "file": "assets/ai-scan-BGdw6p8f.css",
-    "name": "ai-scan",
-    "names": [
-      "ai-scan.css"
-    ],
-    "src": "resources/css/ai-scan.css",
-    "isEntry": true
   },
   "resources/css/analysis.css": {
     "file": "assets/analysis-CR4abdMf.css",
@@ -35,7 +26,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BCeBvaxn.css",
+    "file": "assets/app-XWKtr_1u.css",
     "name": "app",
     "names": [
       "app.css"
@@ -62,7 +53,7 @@
     "isEntry": true
   },
   "resources/css/transactions-page.css": {
-    "file": "assets/transactions-page-Bv-ecsiN.css",
+    "file": "assets/transactions-page-BFdQNvEJ.css",
     "name": "transactions-page",
     "names": [
       "transactions-page.css"
@@ -71,16 +62,16 @@
     "isEntry": true
   },
   "resources/js/ai-scan-entry.js": {
-    "file": "assets/ai-scan-entry-BaOamSUG.js",
+    "file": "assets/ai-scan-entry-D9bVIgcr.js",
     "name": "ai-scan-entry",
     "src": "resources/js/ai-scan-entry.js",
     "isEntry": true,
     "imports": [
-      "_toast-0kjgXVk2.js"
+      "_toast-Ok-mfbLd.js"
     ]
   },
   "resources/js/analysis.js": {
-    "file": "assets/analysis-D0HFgY5J.js",
+    "file": "assets/analysis-CRNOwTIF.js",
     "name": "analysis",
     "src": "resources/js/analysis.js",
     "isEntry": true,
@@ -89,16 +80,16 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Mq3k_z6H.js",
+    "file": "assets/app-Dl--Zjp0.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_toast-0kjgXVk2.js"
+      "_toast-Ok-mfbLd.js"
     ]
   },
   "resources/js/reviews-carousel.js": {
-    "file": "assets/reviews-carousel-_pQovR06.js",
+    "file": "assets/reviews-carousel-DjIX2x_I.js",
     "name": "reviews-carousel",
     "src": "resources/js/reviews-carousel.js",
     "isEntry": true,

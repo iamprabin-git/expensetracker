@@ -24,7 +24,9 @@
                     @foreach ($lines as $line)
                         <tr class="{{ $line['over_budget'] ? 'table-warning' : '' }}">
                             <td data-label="Category">
-                                <span class="d-inline-block rounded-circle me-2 align-middle" style="width:10px;height:10px;background:{{ $line['category']->color ?? '#64748b' }}"></span>
+                                @if (! empty($line['category']))
+                                    <x-category-icon :category="$line['category']" class="size-6 me-2 align-middle inline-flex [&_svg]:size-3" />
+                                @endif
                                 {{ $line['category']->name }}
                                 <span class="badge {{ $line['category']->type->badgeClass() }} ms-1">{{ $line['category']->type->label() }}</span>
                             </td>

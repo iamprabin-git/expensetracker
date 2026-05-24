@@ -46,17 +46,29 @@ class ReportExportService
         $report = $this->builder->trialBalance();
         $rows = [];
 
-        foreach ($report['lines'] as $line) {
-            $rows[] = [
-                $line['account'],
-                $line['debit'] > 0 ? $this->user->formatMoney($line['debit']) : '',
-                $line['credit'] > 0 ? $this->user->formatMoney($line['credit']) : '',
-            ];
+        foreach ($report['sections'] as $section) {
+            $rows[] = [$section['title'], '', ''];
+
+            foreach ($section['lines'] as $line) {
+                $rows[] = [
+                    $line['account'],
+                    $line['debit'] > 0 ? $this->user->formatMoney($line['debit']) : '',
+                    $line['credit'] > 0 ? $this->user->formatMoney($line['credit']) : '',
+                ];
+            }
+
+            if ($section['lines'] !== []) {
+                $rows[] = [
+                    $section['title'].' subtotal',
+                    $this->user->formatMoney($section['subtotal_debit']),
+                    $this->user->formatMoney($section['subtotal_credit']),
+                ];
+            }
         }
 
         if ($rows !== []) {
             $rows[] = [
-                'Total',
+                'Grand total',
                 $this->user->formatMoney($report['total_debit']),
                 $this->user->formatMoney($report['total_credit']),
             ];
@@ -103,8 +115,14 @@ class ReportExportService
     private function balanceSheetDataset(): array
     {
         $report = $this->builder->balanceSheet();
+        $pl = $report['profit_loss'];
         $rows = [
             ['As of', $report['as_of'], ''],
+            ['', '', ''],
+            ['Profit & loss ('.$pl['period_label'].')', '', ''],
+            ['Revenue', $this->user->formatMoney($pl['total_revenue']), ''],
+            ['Expenses', $this->user->formatMoney($pl['total_expenses']), ''],
+            ['Net '.($pl['is_profit'] ? 'profit' : 'loss'), $this->user->formatMoney($pl['net_profit']), ''],
             ['', '', ''],
             ['Assets', '', ''],
         ];
@@ -130,6 +148,7 @@ class ReportExportService
         }
 
         $rows[] = ['Total equity', $this->user->formatMoney($report['total_equity']), ''];
+        $rows[] = ['Liabilities + equity', $this->user->formatMoney($report['total_liabilities_equity']), ''];
 
         return [
             'headers' => ['Line item', 'Amount', ''],
@@ -222,8 +241,8 @@ class ReportExportService
                 'Period totals',
                 '',
                 '',
-                $this->user->formatMoney($totals['expense']),
-                $this->user->formatMoney($totals['income']),
+                $this->user->formatMoney($totals['withdrawals'] ?? $totals['expense']),
+                $this->user->formatMoney($totals['deposits'] ?? $totals['income']),
                 $this->user->formatMoney($totals['balance']),
             ];
         }

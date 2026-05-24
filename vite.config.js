@@ -24,7 +24,6 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/analysis.css',
-                'resources/css/ai-scan.css',
                 'resources/css/statement.css',
                 'resources/css/transactions-page.css',
                 'resources/css/reviews-carousel.css',

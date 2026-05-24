@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CategoryType;
+use App\Support\CategoryIcons;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,8 +17,13 @@ class Category extends Model
         'user_id',
         'name',
         'type',
-        'color',
+        'icon',
     ];
+
+    public function resolvedIcon(): string
+    {
+        return CategoryIcons::resolve($this);
+    }
 
     protected function casts(): array
     {
@@ -41,5 +47,15 @@ class Category extends Model
         return $query->where(function ($q) use ($user) {
             $q->whereNull('user_id')->orWhere('user_id', $user->id);
         });
+    }
+
+    public function scopeSystem($query)
+    {
+        return $query->whereNull('user_id');
+    }
+
+    public function isUserOwned(): bool
+    {
+        return $this->user_id !== null;
     }
 }

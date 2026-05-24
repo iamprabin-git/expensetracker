@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CategoryType;
 use App\Models\Category;
+use App\Support\CategoryIcons;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,7 +23,9 @@ class CategoryController extends Controller
 
     public function create(): View
     {
-        return view('categories.create');
+        return view('categories.create', [
+            'icons' => CategoryIcons::options(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -30,7 +33,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(CategoryType::class)],
-            'color' => ['required', 'string', 'max:20'],
+            'icon' => ['required', 'string', Rule::in(CategoryIcons::keys())],
         ]);
 
         $request->user()->categories()->create($validated);
@@ -42,7 +45,10 @@ class CategoryController extends Controller
     {
         $this->authorizeCategory($request, $category);
 
-        return view('categories.edit', compact('category'));
+        return view('categories.edit', [
+            'category' => $category,
+            'icons' => CategoryIcons::options(),
+        ]);
     }
 
     public function update(Request $request, Category $category): RedirectResponse
@@ -52,7 +58,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(CategoryType::class)],
-            'color' => ['required', 'string', 'max:20'],
+            'icon' => ['required', 'string', Rule::in(CategoryIcons::keys())],
         ]);
 
         $category->update($validated);

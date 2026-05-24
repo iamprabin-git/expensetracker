@@ -121,8 +121,8 @@ class BudgetPlannerService
         }
 
         return match ($side) {
-            TransactionType::Income => in_array($categoryType, [CategoryType::Income, CategoryType::Both], true),
-            TransactionType::Expense => in_array($categoryType, [CategoryType::Expense, CategoryType::Both], true),
+            TransactionType::Income => $categoryType === CategoryType::Income,
+            TransactionType::Expense => $categoryType === CategoryType::Expense,
         };
     }
 
@@ -250,5 +250,82 @@ class BudgetPlannerService
             ->first();
 
         return $source?->period_month->format('F Y');
+    }
+
+    /**
+     * Budget vs actual data for the analysis dashboard.
+     *
+     * @return array{
+     *     month: string,
+     *     month_label: string,
+     *     has_plan: bool,
+     *     summary: array<string, float|int>,
+     *     expense_chart: array{labels: list<string>, budget: list<float>, actual: list<float>},
+     *     income_chart: array{labels: list<string>, budget: list<float>, actual: list<float>},
+     *     expense_lines: list<array<string, mixed>>,
+     *     income_lines: list<array<string, mixed>>,
+     *     over_budget_count: int,
+     * }
+     */
+    public function analysisPayload(User $user, Carbon $month): array
+    {
+        $built = $this->build($user, $month);
+        $summary = $built['summary'];
+        $plan = $built['plan'];
+
+        $expenseLines = $built['expense_lines'];
+        $incomeLines = $built['income_lines'];
+
+        return [
+            'month' => $month->format('Y-m'),
+            'month_label' => $month->format('F Y'),
+            'has_plan' => $plan->items->isNotEmpty()
+                || $summary['expense_limit'] > 0
+                || $summary['income_goal'] > 0,
+            'summary' => $summary,
+            'expense_chart' => $this->linesToChart($expenseLines),
+            'income_chart' => $this->linesToChart($incomeLines),
+            'expense_lines' => $this->linesForTable($expenseLines),
+            'income_lines' => $this->linesForTable($incomeLines),
+            'over_budget_count' => $expenseLines->where('over_budget', true)->count(),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $lines
+     * @return array{labels: list<string>, budget: list<float>, actual: list<float>}
+     */
+    private function linesToChart(Collection $lines): array
+    {
+        if ($lines->isEmpty()) {
+            return ['labels' => [], 'budget' => [], 'actual' => []];
+        }
+
+        return [
+            'labels' => $lines->map(fn (array $line) => $line['category']?->name ?? 'Category')->all(),
+            'budget' => $lines->map(fn (array $line) => round((float) $line['budget'], 2))->all(),
+            'actual' => $lines->map(fn (array $line) => round((float) $line['actual'], 2))->all(),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $lines
+     * @return list<array<string, mixed>>
+     */
+    private function linesForTable(Collection $lines): array
+    {
+        return $lines->map(function (array $line) {
+            return [
+                'category_id' => $line['category']?->id,
+                'category_name' => $line['category']?->name ?? 'Category',
+                'category_icon' => $line['category']?->resolvedIcon(),
+                'budget' => (float) $line['budget'],
+                'actual' => (float) $line['actual'],
+                'remaining' => (float) $line['remaining'],
+                'percent' => (float) $line['percent'],
+                'over_budget' => (bool) $line['over_budget'],
+                'status' => $line['status'],
+            ];
+        })->all();
     }
 }

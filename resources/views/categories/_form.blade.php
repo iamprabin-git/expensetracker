@@ -1,6 +1,8 @@
 @php
     $isEdit = isset($category) && $category;
     $action = $isEdit ? route('categories.update', $category) : route('categories.store');
+    $icons = $icons ?? \App\Support\CategoryIcons::options();
+    $selectedIcon = old('icon', $category?->icon ?? \App\Support\CategoryIcons::DEFAULT);
 @endphp
 
 <div class="card-panel">
@@ -27,9 +29,18 @@
         </div>
 
         <div class="col-span-12 md:col-span-6">
-            <label class="label-app" for="color">Color</label>
-            <input type="color" name="color" id="color" value="{{ old('color', $category?->color ?? '#6366f1') }}" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs-color w-full @error('color') is-invalid @enderror">
-            @error('color')<div class="mt-1 text-sm text-destructive">{{ $message }}</div>@enderror
+            <label class="label-app" for="icon">Icon</label>
+            <select name="icon" id="icon" class="input-app flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs @error('icon') is-invalid @enderror" required>
+                @foreach ($icons as $value => $label)
+                    <option value="{{ $value }}" @selected($selectedIcon === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('icon')<div class="mt-1 text-sm text-destructive">{{ $message }}</div>@enderror
+        </div>
+
+        <div class="col-span-12 flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+            <x-category-icon :icon="$selectedIcon" />
+            <p class="text-sm text-muted-foreground mb-0">Preview</p>
         </div>
 
         <div class="col-span-12 flex gap-2">
@@ -38,4 +49,3 @@
         </div>
     </form>
 </div>
-

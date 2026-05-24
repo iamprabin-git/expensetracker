@@ -51,6 +51,8 @@ function themeColors() {
         expenseFill: dark ? 'rgba(251, 113, 133, 0.15)' : 'rgba(225, 29, 72, 0.12)',
         net: dark ? '#818cf8' : '#4f46e5',
         netFill: dark ? 'rgba(129, 140, 248, 0.12)' : 'rgba(79, 70, 229, 0.1)',
+        budget: dark ? '#fbbf24' : '#d97706',
+        budgetFill: dark ? 'rgba(251, 191, 36, 0.85)' : 'rgba(217, 119, 6, 0.85)',
     };
 }
 
@@ -259,6 +261,64 @@ function renderChart(id, data, Chart) {
                     ],
                 },
                 options: doughnutOptions(),
+            });
+            break;
+        case 'chartBudgetExpense':
+            if (!data.budget?.expense_chart?.labels?.length) {
+                return;
+            }
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.budget.expense_chart.labels,
+                    datasets: [
+                        {
+                            label: 'Budget',
+                            data: data.budget.expense_chart.budget,
+                            backgroundColor: colors.budgetFill,
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Spent',
+                            data: data.budget.expense_chart.actual,
+                            backgroundColor: colors.expense,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    ...baseOptions(),
+                    indexAxis: 'y',
+                },
+            });
+            break;
+        case 'chartBudgetIncome':
+            if (!data.budget?.income_chart?.labels?.length) {
+                return;
+            }
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.budget.income_chart.labels,
+                    datasets: [
+                        {
+                            label: 'Goal',
+                            data: data.budget.income_chart.budget,
+                            backgroundColor: colors.budgetFill,
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Earned',
+                            data: data.budget.income_chart.actual,
+                            backgroundColor: colors.income,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    ...baseOptions(),
+                    indexAxis: 'y',
+                },
             });
             break;
         default:

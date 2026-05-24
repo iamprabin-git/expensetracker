@@ -1,15 +1,15 @@
-<div class="report-page report-page-wrap card-panel bg-white mx-auto mb-4">
-    <div class="border-bottom pb-4 mb-4">
-        <div class="flex flex-wrap justify-between align-items-start gap-3">
+<div class="report-doc report-page-wrap mx-auto mb-4">
+    <div class="report-doc__header">
+        <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <p class="text-uppercase small font-semibold text-muted-foreground mb-1">Financial report</p>
-                <h1 class="text-xl font-semibold tracking-tight font-bold mb-1">{{ $reportTitle }}</h1>
-                <p class="mb-0 text-muted-foreground">{{ $user->name }} · {{ $user->email }}</p>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Financial report</p>
+                <h1 class="mb-1 text-xl font-bold tracking-tight text-foreground">{{ $reportTitle }}</h1>
+                <p class="mb-0 text-sm text-muted-foreground">{{ $user->name }} · {{ $user->email }}</p>
             </div>
             <div class="md:text-right">
-                <p class="mb-1 small text-muted-foreground">Period</p>
-                <p class="font-semibold mb-1">{{ $periodLabel }}</p>
-                <p class="mb-0 small text-muted-foreground">Generated {{ $generatedAt->format('M d, Y g:i A') }}</p>
+                <p class="mb-1 text-xs text-muted-foreground">Period</p>
+                <p class="mb-1 text-sm font-semibold text-foreground">{{ $periodLabel }}</p>
+                <p class="mb-0 text-xs text-muted-foreground">Generated {{ $generatedAt->format('M d, Y g:i A') }}</p>
             </div>
         </div>
     </div>

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\TransactionImportService;
 use App\Services\TransactionListExportService;
 use App\Support\TabularExporter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -114,6 +116,53 @@ class TransactionController extends Controller
         $transaction->delete();
 
         return redirect()->route('transactions.index')->with('success', 'Transaction deleted.');
+    }
+
+    public function importTemplate(TransactionImportService $importService): StreamedResponse
+    {
+        return $importService->templateDownload();
+    }
+
+    public function import(Request $request, TransactionImportService $importService): RedirectResponse
+    {
+        $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:5120',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! $value instanceof UploadedFile) {
+                        return;
+                    }
+
+                    $extension = strtolower($value->getClientOriginalExtension());
+
+                    if (! in_array($extension, ['csv', 'txt', 'xlsx'], true)) {
+                        $fail('The file must be a .csv or .xlsx spreadsheet.');
+                    }
+                },
+            ],
+        ]);
+
+        $result = $importService->import($request->user(), $request->file('file'));
+
+        if ($result->imported === 0 && $result->hasErrors()) {
+            return redirect()
+                ->route('transactions.index')
+                ->with('error', $result->errors[0])
+                ->with('import_errors', $result->errors);
+        }
+
+        $message = "{$result->imported} transaction".($result->imported === 1 ? '' : 's').' imported successfully.';
+
+        if ($result->skipped > 0) {
+            $message .= " {$result->skipped} row".($result->skipped === 1 ? '' : 's').' skipped.';
+        }
+
+        return redirect()
+            ->route('transactions.index')
+            ->with('success', $message)
+            ->with('import_errors', $result->errors);
     }
 
     public function export(Request $request, string $format): StreamedResponse

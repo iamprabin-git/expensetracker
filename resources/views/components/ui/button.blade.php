@@ -4,6 +4,7 @@
     'type' => 'button',
     'disabled' => false,
     'headerLink' => false,
+    'tag' => null,
 ])
 
 @php
@@ -42,9 +43,13 @@
     if ($headerLink) {
         $attr = $attr->merge(['data-site-header-link' => true]);
     }
+
+    $resolvedTag = $tag ?? ($attributes->has('href') ? 'a' : 'button');
 @endphp
 
-@if ($attributes->has('href'))
+@if ($resolvedTag === 'label')
+    <label {{ $attr }}>{{ $slot }}</label>
+@elseif ($resolvedTag === 'a' || $attributes->has('href'))
     <a {{ $attr }}>{{ $slot }}</a>
 @else
     <button type="{{ $type }}" {{ $attr }} @if ($disabled) disabled @endif>{{ $slot }}</button>

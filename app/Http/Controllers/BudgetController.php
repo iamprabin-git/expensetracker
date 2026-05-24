@@ -28,7 +28,6 @@ class BudgetController extends Controller
             ->filter(fn (Category $category) => in_array($category->type, [
                 CategoryType::Income,
                 CategoryType::Expense,
-                CategoryType::Both,
             ], true))
             ->reject(fn (Category $category) => $usedCategoryIds->contains($category->id));
         $data['can_copy_previous'] = $this->planner->previousPlanLabel($request->user(), $month) !== null;
@@ -145,5 +144,4 @@ class BudgetController extends Controller
 
         return $plan;
     }
-
 }

@@ -60,8 +60,6 @@ class FinancialReportBuilder
     }
 
     /**
-     * Transactions within the selected period.
-     *
      * @return Collection<int, Transaction>
      */
     public function periodTransactions(): Collection
@@ -70,8 +68,6 @@ class FinancialReportBuilder
     }
 
     /**
-     * All transactions up to and including as-of date.
-     *
      * @return Collection<int, Transaction>
      */
     public function cumulativeTransactions(): Collection
@@ -82,8 +78,6 @@ class FinancialReportBuilder
     }
 
     /**
-     * Transactions before period start (for opening cash).
-     *
      * @return Collection<int, Transaction>
      */
     public function transactionsBeforePeriod(): Collection
@@ -101,51 +95,59 @@ class FinancialReportBuilder
     {
         $transactions = $this->periodTransactions();
         $lines = [];
+        $sections = [];
 
-        $incomeByCategory = $this->sumByCategory($transactions, TransactionType::Income);
-        foreach ($incomeByCategory as $row) {
-            $lines[] = [
-                'account' => $row['name'].' (Income)',
-                'type' => 'income',
-                'debit' => 0.0,
-                'credit' => $row['total'],
+        $sectionDefs = [
+            ['key' => 'income', 'title' => 'Income', 'type' => TransactionType::Income, 'side' => 'credit'],
+            ['key' => 'expense', 'title' => 'Expenses', 'type' => TransactionType::Expense, 'side' => 'debit'],
+            ['key' => 'asset', 'title' => 'Assets', 'type' => TransactionType::Asset, 'side' => 'debit'],
+            ['key' => 'liability', 'title' => 'Liabilities', 'type' => TransactionType::Liability, 'side' => 'credit'],
+        ];
+
+        foreach ($sectionDefs as $def) {
+            $sectionLines = $this->trialBalanceCategoryLines(
+                $transactions,
+                $def['type'],
+                $def['side'],
+            );
+            $sections[] = [
+                'key' => $def['key'],
+                'title' => $def['title'],
+                'lines' => $sectionLines,
+                'subtotal_debit' => round(collect($sectionLines)->sum('debit'), 2),
+                'subtotal_credit' => round(collect($sectionLines)->sum('credit'), 2),
             ];
+            array_push($lines, ...$sectionLines);
         }
 
-        $expenseByCategory = $this->sumByCategory($transactions, TransactionType::Expense);
-        foreach ($expenseByCategory as $row) {
-            $lines[] = [
-                'account' => $row['name'].' (Expense)',
-                'type' => 'expense',
-                'debit' => $row['total'],
-                'credit' => 0.0,
-            ];
-        }
-
-        $net = $this->sumIncome($transactions) - $this->sumExpense($transactions);
-        if ($net >= 0) {
-            $lines[] = [
-                'account' => 'Cash & equivalents (net increase)',
+        $netCash = $this->netCashEffect($transactions);
+        if (abs($netCash) >= 0.01) {
+            $cashLine = [
+                'account' => $netCash >= 0
+                    ? 'Cash & cash equivalents (balancing)'
+                    : 'Cash & cash equivalents (balancing)',
                 'type' => 'cash',
-                'debit' => $net,
-                'credit' => 0.0,
+                'debit' => $netCash >= 0 ? round($netCash, 2) : 0.0,
+                'credit' => $netCash < 0 ? round(abs($netCash), 2) : 0.0,
             ];
-        } elseif ($net < 0) {
-            $lines[] = [
-                'account' => 'Cash & equivalents (net decrease)',
-                'type' => 'cash',
-                'debit' => 0.0,
-                'credit' => abs($net),
+            $lines[] = $cashLine;
+            $sections[] = [
+                'key' => 'cash',
+                'title' => 'Balancing',
+                'lines' => [$cashLine],
+                'subtotal_debit' => $cashLine['debit'],
+                'subtotal_credit' => $cashLine['credit'],
             ];
         }
 
-        $totalDebit = collect($lines)->sum('debit');
-        $totalCredit = collect($lines)->sum('credit');
+        $totalDebit = round(collect($lines)->sum('debit'), 2);
+        $totalCredit = round(collect($lines)->sum('credit'), 2);
 
         return [
+            'sections' => $sections,
             'lines' => $lines,
-            'total_debit' => round($totalDebit, 2),
-            'total_credit' => round($totalCredit, 2),
+            'total_debit' => $totalDebit,
+            'total_credit' => $totalCredit,
             'balanced' => abs($totalDebit - $totalCredit) < 0.01,
         ];
     }
@@ -156,8 +158,8 @@ class FinancialReportBuilder
         $revenue = $this->sumByCategory($transactions, TransactionType::Income);
         $expenses = $this->sumByCategory($transactions, TransactionType::Expense);
 
-        $totalRevenue = $this->sumIncome($transactions);
-        $totalExpenses = $this->sumExpense($transactions);
+        $totalRevenue = $this->sumType($transactions, TransactionType::Income);
+        $totalExpenses = $this->sumType($transactions, TransactionType::Expense);
         $netProfit = $totalRevenue - $totalExpenses;
 
         return [
@@ -173,29 +175,68 @@ class FinancialReportBuilder
     public function balanceSheet(): array
     {
         $cumulative = $this->cumulativeTransactions();
-        $cash = $this->sumIncome($cumulative) - $this->sumExpense($cumulative);
-        $cash = round(max($cash, 0), 2);
+        $beforePeriod = $this->transactionsBeforePeriod();
+        $period = $this->periodTransactions();
 
-        $equity = round($this->sumIncome($cumulative) - $this->sumExpense($cumulative), 2);
-        $liabilities = 0.0;
-        $assets = round($cash, 2);
+        $assetRows = $this->sumByCategory($cumulative, TransactionType::Asset)
+            ->map(fn (array $row) => ['name' => $row['name'], 'amount' => $row['total']])
+            ->all();
+
+        $cash = round($this->netCashEffect($cumulative), 2);
+        $assetRows[] = ['name' => 'Cash and cash equivalents', 'amount' => $cash];
+
+        $liabilityRows = $this->sumByCategory($cumulative, TransactionType::Liability)
+            ->map(fn (array $row) => ['name' => $row['name'], 'amount' => $row['total']])
+            ->all();
+
+        $totalAssets = round(collect($assetRows)->sum('amount'), 2);
+        $totalLiabilities = round(collect($liabilityRows)->sum('amount'), 2);
+
+        $periodProfit = round(
+            $this->sumType($period, TransactionType::Income) - $this->sumType($period, TransactionType::Expense),
+            2,
+        );
+
+        $openingEquity = round($this->netEquity($beforePeriod), 2);
+        $closingEquity = round($totalAssets - $totalLiabilities, 2);
+
+        if ($this->fromDate) {
+            $equityRows = [
+                ['name' => 'Retained earnings (opening)', 'amount' => $openingEquity],
+                [
+                    'name' => $periodProfit >= 0 ? 'Profit for the period' : 'Loss for the period',
+                    'amount' => $periodProfit,
+                ],
+            ];
+        } else {
+            $equityRows = [
+                ['name' => 'Retained earnings (net worth)', 'amount' => $closingEquity],
+            ];
+            $periodProfit = $closingEquity;
+            $openingEquity = 0.0;
+        }
+
+        $totalEquity = round(collect($equityRows)->sum('amount'), 2);
 
         return [
             'as_of' => $this->asOfDate()->format('M d, Y'),
-            'assets' => [
-                ['name' => 'Cash and cash equivalents', 'amount' => $cash],
+            'assets' => $assetRows,
+            'liabilities' => $liabilityRows,
+            'equity' => $equityRows,
+            'profit_loss' => [
+                'period_label' => $this->periodLabel(),
+                'total_revenue' => round($this->sumType($period, TransactionType::Income), 2),
+                'total_expenses' => round($this->sumType($period, TransactionType::Expense), 2),
+                'net_profit' => $periodProfit,
+                'is_profit' => $periodProfit >= 0,
             ],
-            'liabilities' => [
-                ['name' => 'Accounts payable', 'amount' => $liabilities],
-            ],
-            'equity' => [
-                ['name' => 'Retained earnings (net worth)', 'amount' => $equity],
-            ],
-            'total_assets' => $assets,
-            'total_liabilities' => $liabilities,
-            'total_equity' => $equity,
-            'total_liabilities_equity' => round($liabilities + $equity, 2),
-            'balanced' => abs($assets - ($liabilities + $equity)) < 0.01,
+            'opening_equity' => $openingEquity,
+            'period_profit' => $periodProfit,
+            'total_assets' => $totalAssets,
+            'total_liabilities' => $totalLiabilities,
+            'total_equity' => $totalEquity,
+            'total_liabilities_equity' => round($totalLiabilities + $totalEquity, 2),
+            'balanced' => abs($totalAssets - ($totalLiabilities + $totalEquity)) < 0.01,
         ];
     }
 
@@ -204,12 +245,18 @@ class FinancialReportBuilder
         $period = $this->periodTransactions();
         $before = $this->transactionsBeforePeriod();
 
-        $cashFromIncome = $this->sumIncome($period);
-        $cashPaidExpenses = $this->sumExpense($period);
-        $netOperating = $cashFromIncome - $cashPaidExpenses;
+        $cashFromIncome = $this->sumType($period, TransactionType::Income);
+        $cashPaidExpenses = $this->sumType($period, TransactionType::Expense);
+        $assetOutflows = $this->sumType($period, TransactionType::Asset);
+        $liabilityInflows = $this->sumType($period, TransactionType::Liability);
 
-        $openingCash = $this->sumIncome($before) - $this->sumExpense($before);
-        $closingCash = $openingCash + $netOperating;
+        $netOperating = $cashFromIncome - $cashPaidExpenses;
+        $netInvesting = -$assetOutflows;
+        $netFinancing = $liabilityInflows;
+        $netChange = $netOperating + $netInvesting + $netFinancing;
+
+        $openingCash = $this->netCashEffect($before);
+        $closingCash = $openingCash + $netChange;
 
         $monthly = $this->monthlyCashFlow($period);
 
@@ -220,15 +267,15 @@ class FinancialReportBuilder
                 ['label' => 'Net cash from operating activities', 'amount' => round($netOperating, 2), 'bold' => true],
             ],
             'investing' => [
-                ['label' => 'Investing activities', 'amount' => 0.0],
-                ['label' => 'Net cash from investing activities', 'amount' => 0.0, 'bold' => true],
+                ['label' => 'Asset purchases and investments', 'amount' => round(-$assetOutflows, 2)],
+                ['label' => 'Net cash from investing activities', 'amount' => round($netInvesting, 2), 'bold' => true],
             ],
             'financing' => [
-                ['label' => 'Financing activities', 'amount' => 0.0],
-                ['label' => 'Net cash from financing activities', 'amount' => 0.0, 'bold' => true],
+                ['label' => 'Borrowings and liability increases', 'amount' => round($liabilityInflows, 2)],
+                ['label' => 'Net cash from financing activities', 'amount' => round($netFinancing, 2), 'bold' => true],
             ],
             'summary' => [
-                'net_change' => round($netOperating, 2),
+                'net_change' => round($netChange, 2),
                 'opening_cash' => round($openingCash, 2),
                 'closing_cash' => round($closingCash, 2),
             ],
@@ -239,15 +286,21 @@ class FinancialReportBuilder
     public function transactionStatement(): array
     {
         $transactions = $this->periodTransactions();
-        $income = $this->sumIncome($transactions);
-        $expense = $this->sumExpense($transactions);
+        $creditTypes = [TransactionType::Income, TransactionType::Asset];
+
+        $credits = $transactions->filter(fn (Transaction $t) => in_array($t->type, $creditTypes, true))->sum('amount');
+        $debits = $transactions->reject(fn (Transaction $t) => in_array($t->type, $creditTypes, true))->sum('amount');
 
         return [
             'transactions' => $transactions,
             'totals' => [
-                'income' => $income,
-                'expense' => $expense,
-                'balance' => $income - $expense,
+                'income' => (float) $this->sumType($transactions, TransactionType::Income),
+                'expense' => (float) $this->sumType($transactions, TransactionType::Expense),
+                'asset' => (float) $this->sumType($transactions, TransactionType::Asset),
+                'liability' => (float) $this->sumType($transactions, TransactionType::Liability),
+                'deposits' => round((float) $credits, 2),
+                'withdrawals' => round((float) $debits, 2),
+                'balance' => round($this->netCashEffect($transactions), 2),
                 'count' => $transactions->count(),
             ],
         ];
@@ -273,7 +326,29 @@ class FinancialReportBuilder
     }
 
     /**
-     * @return Collection<int, Transaction>
+     * @return array<int, array{account: string, type: string, debit: float, credit: float}>
+     */
+    private function trialBalanceCategoryLines(
+        Collection $transactions,
+        TransactionType $type,
+        string $normalSide,
+    ): array {
+        $lines = [];
+
+        foreach ($this->sumByCategory($transactions, $type) as $row) {
+            $lines[] = [
+                'account' => $row['name'].' ('.$type->label().')',
+                'type' => $type->value,
+                'debit' => $normalSide === 'debit' ? $row['total'] : 0.0,
+                'credit' => $normalSide === 'credit' ? $row['total'] : 0.0,
+            ];
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @return Collection<int, array{name: string, total: float}>
      */
     private function sumByCategory(Collection $transactions, TransactionType $type): Collection
     {
@@ -288,14 +363,27 @@ class FinancialReportBuilder
             ->values();
     }
 
-    private function sumIncome(Collection $transactions): float
+    private function sumType(Collection $transactions, TransactionType $type): float
     {
-        return (float) $transactions->where('type', TransactionType::Income)->sum('amount');
+        return (float) $transactions->where('type', $type)->sum('amount');
     }
 
-    private function sumExpense(Collection $transactions): float
+    /**
+     * Net cash movement: income increases cash, expenses/assets decrease it, liabilities increase it.
+     */
+    private function netCashEffect(Collection $transactions): float
     {
-        return (float) $transactions->where('type', TransactionType::Expense)->sum('amount');
+        return $this->sumType($transactions, TransactionType::Income)
+            - $this->sumType($transactions, TransactionType::Expense)
+            - $this->sumType($transactions, TransactionType::Asset)
+            + $this->sumType($transactions, TransactionType::Liability);
+    }
+
+    private function netEquity(Collection $transactions): float
+    {
+        return $this->netCashEffect($transactions)
+            + $this->sumType($transactions, TransactionType::Asset)
+            - $this->sumType($transactions, TransactionType::Liability);
     }
 
     /**
@@ -307,8 +395,10 @@ class FinancialReportBuilder
             ->groupBy(fn (Transaction $t) => $t->transaction_date->format('Y-m'))
             ->sortKeys()
             ->map(function (Collection $group, string $key) {
-                $inflow = $this->sumIncome($group);
-                $outflow = $this->sumExpense($group);
+                $inflow = $this->sumType($group, TransactionType::Income)
+                    + $this->sumType($group, TransactionType::Liability);
+                $outflow = $this->sumType($group, TransactionType::Expense)
+                    + $this->sumType($group, TransactionType::Asset);
 
                 return [
                     'month' => Carbon::createFromFormat('Y-m', $key)->format('M Y'),

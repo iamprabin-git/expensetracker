@@ -1,56 +1,99 @@
-<x-guest-layout>
-    <h1 class="text-xl font-semibold tracking-tight mb-2">Create account</h1>
-    @include('auth.partials.registration-notice')
+<x-auth-layout title="Create account" mode="register">
+    <header class="auth-card__head">
+        <h1 class="auth-card__title">Create your account</h1>
+        <p class="auth-card__subtitle">Join free — start tracking your money in minutes.</p>
+    </header>
+
+    <div class="auth-alert auth-alert--info" role="status">
+        <strong>What happens next:</strong> we email the admin for approval and send you login details. Sign in once approved.
+    </div>
+
+    @if ($errors->any() && ! $errors->has('name') && ! $errors->has('email') && ! $errors->has('password') && ! $errors->has('password_confirmation'))
+        <div class="auth-alert auth-alert--error" role="alert">{{ $errors->first() }}</div>
+    @endif
+
     @include('auth.partials.google-button')
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" class="auth-form">
         @csrf
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        <div class="auth-form__grid">
+            <div class="auth-form__field auth-form__field--full">
+                <x-ui.label for="name">{{ __('Full name') }}</x-ui.label>
+                <x-ui.input
+                    id="name"
+                    type="text"
+                    name="name"
+                    :value="old('name')"
+                    required
+                    autofocus
+                    autocomplete="name"
+                    placeholder="Jane Doe"
+                    class="auth-input"
+                    @class(['aria-invalid' => $errors->has('name')])
+                />
+                <x-ui.field-error :messages="$errors->get('name')" />
+            </div>
+
+            <div class="auth-form__field auth-form__field--full">
+                <x-ui.label for="email">{{ __('Email address') }}</x-ui.label>
+                <x-ui.input
+                    id="email"
+                    type="email"
+                    name="email"
+                    :value="old('email')"
+                    required
+                    autocomplete="username"
+                    placeholder="you@example.com"
+                    class="auth-input"
+                    @class(['aria-invalid' => $errors->has('email')])
+                />
+                <x-ui.field-error :messages="$errors->get('email')" />
+            </div>
+
+            <div class="auth-form__field">
+                <x-ui.label for="password">{{ __('Password') }}</x-ui.label>
+                <x-ui.input
+                    id="password"
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                    class="auth-input"
+                    @class(['aria-invalid' => $errors->has('password')])
+                />
+                <x-ui.field-error :messages="$errors->get('password')" />
+            </div>
+
+            <div class="auth-form__field">
+                <x-ui.label for="password_confirmation">{{ __('Confirm') }}</x-ui.label>
+                <x-ui.input
+                    id="password_confirmation"
+                    type="password"
+                    name="password_confirmation"
+                    required
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                    class="auth-input"
+                    @class(['aria-invalid' => $errors->has('password_confirmation')])
+                />
+                <x-ui.field-error :messages="$errors->get('password_confirmation')" />
+            </div>
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
+        <x-ui.button type="submit" size="lg" class="auth-form__submit">{{ __('Create account') }}</x-ui.button>
     </form>
-</x-guest-layout>
+
+    <p class="auth-card__switch">
+        {{ __('Already have an account?') }}
+        <a href="{{ route('login') }}">{{ __('Sign in') }}</a>
+    </p>
+
+    <div class="auth-card__note">
+        <p class="mb-0">New accounts require admin approval before dashboard access.</p>
+        <div class="auth-card__note-links">
+            <a href="{{ url('/admin/login') }}">Admin login</a>
+        </div>
+    </div>
+</x-auth-layout>

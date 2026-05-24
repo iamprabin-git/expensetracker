@@ -15,6 +15,10 @@
                     <span></span>
                 </span>
             </button>
+
+            <a href="{{ route('dashboard') }}" class="user-panel-header__brand lg:hidden">
+                <x-site-brand tag="span" />
+            </a>
         </div>
 
         <div class="user-panel-header__actions">

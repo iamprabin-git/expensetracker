@@ -1,54 +1,78 @@
-<x-guest-layout>
-    <h1 class="text-xl font-semibold tracking-tight mb-2">Log in</h1>
-    <p class="text-sm text-muted-foreground mb-4">Use Google or your email and password. New accounts need admin approval before the dashboard is available.</p>
+<x-auth-layout title="Log in" mode="login">
+    <header class="auth-card__head">
+        <h1 class="auth-card__title">Welcome back</h1>
+        <p class="auth-card__subtitle">Sign in to manage transactions, budgets, and reports.</p>
+    </header>
+
+    @if (session('status'))
+        <div class="auth-alert auth-alert--info" role="status">{{ session('status') }}</div>
+    @endif
+
+    @if ($errors->any() && ! $errors->has('email') && ! $errors->has('password'))
+        <div class="auth-alert auth-alert--error" role="alert">{{ $errors->first() }}</div>
+    @endif
 
     @include('auth.partials.google-button')
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" class="auth-form">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="auth-form__field">
+            <x-ui.label for="email">{{ __('Email address') }}</x-ui.label>
+            <x-ui.input
+                id="email"
+                type="email"
+                name="email"
+                :value="old('email')"
+                required
+                autofocus
+                autocomplete="username"
+                placeholder="you@example.com"
+                class="auth-input"
+                @class(['aria-invalid' => $errors->has('email')])
+            />
+            <x-ui.field-error :messages="$errors->get('email')" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="auth-form__field">
+            <x-ui.label for="password">{{ __('Password') }}</x-ui.label>
+            <x-ui.input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="auth-input"
+                @class(['aria-invalid' => $errors->has('password')])
+            />
+            <x-ui.field-error :messages="$errors->get('password')" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="auth-form__row">
+            <label for="remember_me" class="auth-form__remember">
+                <x-ui.checkbox id="remember_me" name="remember" />
+                <span>{{ __('Remember me') }}</span>
             </label>
-        </div>
-
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
             @if (Route::has('password.request'))
-                <a class="text-sm text-primary hover:underline" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
+                <a class="auth-form__link" href="{{ route('password.request') }}">{{ __('Forgot password?') }}</a>
             @endif
-
-            <x-primary-button>
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <x-ui.button type="submit" size="lg" class="auth-form__submit">{{ __('Sign in') }}</x-ui.button>
     </form>
 
-    <p class="text-sm text-muted-foreground mt-3 mb-0">
-        Admin login? <a href="{{ url('/admin/login') }}" class="no-underline">Open admin panel</a>
-        · <a href="{{ url('/admin/password-reset/request') }}" class="no-underline">Forgot admin password</a>
+    <p class="auth-card__switch">
+        {{ __('Don\'t have an account?') }}
+        <a href="{{ route('register') }}">{{ __('Create account') }}</a>
     </p>
-</x-guest-layout>
+
+    <div class="auth-card__note">
+        <p class="mb-0">Accounts are approved by an administrator before dashboard access.</p>
+        <div class="auth-card__note-links">
+            <a href="{{ url('/admin/login') }}">Admin login</a>
+            <span aria-hidden="true">·</span>
+            <a href="{{ url('/admin/password-reset/request') }}">Admin password reset</a>
+        </div>
+    </div>
+</x-auth-layout>

@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <main class="w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 md:py-5 report-main">
+    <main class="report-main w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 md:py-5">
         @yield('content')
     </main>
 </body>

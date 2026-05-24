@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\TransactionType;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Support\CategoryIcons;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class TransactionAnalytics
@@ -85,9 +87,8 @@ class TransactionAnalytics
             ->where('transactions.type', $type)
             ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
             ->selectRaw("COALESCE(categories.name, 'Uncategorized') as name")
-            ->selectRaw("COALESCE(categories.color, '#94a3b8') as color")
             ->selectRaw('SUM(transactions.amount) as total')
-            ->groupByRaw("COALESCE(categories.name, 'Uncategorized'), COALESCE(categories.color, '#94a3b8')")
+            ->groupByRaw("COALESCE(categories.name, 'Uncategorized')")
             ->orderByDesc('total')
             ->limit($limit)
             ->get();
@@ -95,7 +96,9 @@ class TransactionAnalytics
         return [
             'labels' => $rows->pluck('name')->all(),
             'values' => $rows->map(fn ($r) => round((float) $r->total, 2))->all(),
-            'colors' => $rows->pluck('color')->all(),
+            'colors' => $rows->values()->map(
+                fn ($row, int $index) => CategoryIcons::chartColor($index)
+            )->all(),
         ];
     }
 
@@ -125,8 +128,8 @@ class TransactionAnalytics
         return Transaction::query()->where('user_id', $this->user->id);
     }
 
-  /**
-     * @return Collection<int, array{key: string, label: string, start: \Carbon\Carbon}>
+    /**
+     * @return Collection<int, array{key: string, label: string, start: Carbon}>
      */
     private function monthPeriod(): Collection
     {

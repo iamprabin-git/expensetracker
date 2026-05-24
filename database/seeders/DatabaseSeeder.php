@@ -50,12 +50,12 @@ class DatabaseSeeder extends Seeder
         );
 
         $categories = [
-            ['name' => 'Salary', 'type' => CategoryType::Income, 'color' => '#22c55e'],
-            ['name' => 'Freelance', 'type' => CategoryType::Income, 'color' => '#10b981'],
-            ['name' => 'Food & Dining', 'type' => CategoryType::Expense, 'color' => '#f97316'],
-            ['name' => 'Transport', 'type' => CategoryType::Expense, 'color' => '#3b82f6'],
-            ['name' => 'Shopping', 'type' => CategoryType::Expense, 'color' => '#a855f7'],
-            ['name' => 'Bills', 'type' => CategoryType::Expense, 'color' => '#ef4444'],
+            ['name' => 'Salary', 'type' => CategoryType::Income, 'icon' => 'banknotes'],
+            ['name' => 'Freelance', 'type' => CategoryType::Income, 'icon' => 'computer-desktop'],
+            ['name' => 'Food & Dining', 'type' => CategoryType::Expense, 'icon' => 'utensils'],
+            ['name' => 'Transport', 'type' => CategoryType::Expense, 'icon' => 'truck'],
+            ['name' => 'Shopping', 'type' => CategoryType::Expense, 'icon' => 'shopping-bag'],
+            ['name' => 'Bills', 'type' => CategoryType::Expense, 'icon' => 'document-text'],
         ];
 
         foreach ($categories as $data) {

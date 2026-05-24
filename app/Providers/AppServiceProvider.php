@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
             'layouts.partials.site-footer',
             'layouts.partials.site-header',
             'layouts.guest',
+            'layouts.auth',
             'components.site-brand',
             'components.marketing-layout',
             'components.layouts.user',

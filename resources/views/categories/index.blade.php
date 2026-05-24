@@ -11,7 +11,7 @@
                 <div class="card-panel h-full">
                     <div class="flex align-items-start justify-between gap-2 mb-2">
                         <div class="flex items-center gap-2">
-                            <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:{{ $category->color }}"></span>
+                            <x-category-icon :category="$category" class="size-9" />
                             <h3 class="h6 font-semibold mb-0">{{ $category->name }}</h3>
                         </div>
                         <span class="badge {{ $category->type->badgeClass() }}">{{ $category->type->label() }}</span>

@@ -15,6 +15,9 @@
 @import './contact-section.css';
 @import './pricing-section.css';
 @import './settings-page.css';
+@import './auth-page.css';
+@import './reports.css';
+@import './ai-scan.css';
 
 @layer components {
     .card-panel {
@@ -199,7 +202,7 @@
     }
 
     .site-brand__text {
-        @apply hidden min-[400px]:inline;
+        @apply inline min-w-0 truncate;
     }
 
     .site-brand {
@@ -579,7 +582,20 @@
     }
 
     .user-panel-header__start {
-        @apply flex items-center;
+        @apply flex min-w-0 flex-1 items-center gap-2;
+    }
+
+    .user-panel-header__brand {
+        @apply min-w-0 truncate text-base font-bold text-slate-900 no-underline dark:text-white;
+    }
+
+    .user-panel-header__brand .site-brand__accent {
+        @apply text-indigo-600 dark:text-indigo-400;
+    }
+
+    .user-panel-header__brand .site-brand__logo {
+        max-height: 2rem;
+        max-width: 9rem;
     }
 
     .user-panel-header__actions {

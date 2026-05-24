@@ -18,6 +18,14 @@
         @php
             $listExportQuery = request()->only(['search', 'type']);
         @endphp
+        <x-ui.button
+            variant="outline"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#transaction-import-modal"
+        >
+            Import
+        </x-ui.button>
         <x-export-dropdown
             label="Export"
             :pdf-href="route('transactions.statement.pdf', $listExportQuery)"
@@ -29,6 +37,22 @@
     </x-slot>
 
     <div class="transactions-page">
+        @if (session('import_errors'))
+            <div class="transactions-page__import-result" role="status">
+                @if (session('success'))
+                    <p class="transactions-page__import-result-success mb-2">{{ session('success') }}</p>
+                @endif
+                @if (count(session('import_errors')) > 0)
+                    <p class="mb-1 text-sm font-medium">Import issues:</p>
+                    <ul class="mb-0 ps-4 text-sm text-muted-foreground">
+                        @foreach (session('import_errors') as $importError)
+                            <li>{{ $importError }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @endif
+
         <div class="transactions-page__summary">
             <div class="transactions-page__stat">
                 <p class="transactions-page__stat-label">Matching records</p>
@@ -191,4 +215,6 @@
             @endif
         </section>
     </div>
+
+    @include('transactions.partials.import-modal')
 </x-user-layout>

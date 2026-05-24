@@ -8,7 +8,6 @@ enum CategoryType: string
     case Expense = 'expense';
     case Asset = 'asset';
     case Liability = 'liability';
-    case Both = 'both';
 
     public function label(): string
     {
@@ -17,7 +16,6 @@ enum CategoryType: string
             self::Expense => 'Expense',
             self::Asset => 'Asset',
             self::Liability => 'Liability',
-            self::Both => 'Both',
         };
     }
 
@@ -28,7 +26,6 @@ enum CategoryType: string
             self::Expense => 'text-bg-danger',
             self::Asset => 'text-bg-primary',
             self::Liability => 'text-bg-warning',
-            self::Both => 'text-bg-secondary',
         };
     }
 
@@ -39,7 +36,6 @@ enum CategoryType: string
             self::Expense => 'danger',
             self::Asset => 'info',
             self::Liability => 'warning',
-            self::Both => 'gray',
         };
     }
 }

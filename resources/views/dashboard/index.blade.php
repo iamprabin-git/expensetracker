@@ -58,7 +58,8 @@
                                     <td class="font-medium" data-label="Title">{{ $transaction->title }}</td>
                                     <td class="hidden md:table-cell" data-label="Category">
                                         @if ($transaction->category)
-                                            <span class="badge rounded-pill" style="background-color: {{ $transaction->category->color }}20; color: {{ $transaction->category->color }}">
+                                            <span class="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-0.5 text-xs font-medium text-foreground">
+                                                <x-category-icon :category="$transaction->category" class="size-6 [&_svg]:size-3" />
                                                 {{ $transaction->category->name }}
                                             </span>
                                         @else
